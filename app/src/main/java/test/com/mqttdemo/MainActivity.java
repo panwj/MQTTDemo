@@ -44,8 +44,9 @@ public class MainActivity extends AppCompatActivity {
                 if (MqttManager.isCreateClient()) {
                     if (!MqttManager.isConnected()) MqttManager.getInstance(getApplicationContext()).doConnect();
                 } else {
-                    String serverUri = "tcp://broker.emqx.io:1883";
-                    String clientId = "aa" + System.currentTimeMillis();
+                    String serverUri = "ssl://54.205.75.48:9883";
+//                    String serverUri = "tcp://broker.emqx.io:1883";
+                    String clientId = "56_1203";
                     MqttManager.getInstance(getApplicationContext()).createConnect(serverUri, clientId);
                 }
             }

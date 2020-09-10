@@ -13,6 +13,14 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.security.SecureRandom;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+
 public class MqttManager {
 
     private static final String TAG = "MqttManager";
@@ -32,7 +40,7 @@ public class MqttManager {
     }
 
     private MqttManager(Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
     }
 
     /**
@@ -93,7 +101,17 @@ public class MqttManager {
 //                mqttConnectOptions.setKeepAliveInterval(20);
                 //设置遗言消息
 //                mqttConnectOptions.setWill("home/rome/light1","test".getBytes(),1,true);
+                TrustAllManager trustAllManager = new TrustAllManager();
+                mqttConnectOptions.setSocketFactory(createTrustAllSSLFactory(trustAllManager));
+                mqttConnectOptions.setSSLHostnameVerifier(createTrustAllHostnameVerifier());
+                mqttConnectOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
+                mqttConnectOptions.setPassword("123_c90265a583aaea81".toCharArray());
+                mqttConnectOptions.setUserName("56_paj");
 
+
+                Log.e(TAG, "mqttConnectOptions --> " + mqttConnectOptions.toString());
+
+                mMqttAndroidClient.setDebugUnregister(false);
                 mMqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken) {
@@ -170,5 +188,28 @@ public class MqttManager {
      */
     public static boolean isConnected() {
         return mMqttAndroidClient != null && mMqttAndroidClient.isConnected();
+    }
+
+    protected SSLSocketFactory createTrustAllSSLFactory(TrustAllManager trustAllManager) {
+        SSLSocketFactory ssfFactory = null;
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, new TrustManager[]{trustAllManager}, new SecureRandom());
+            ssfFactory = sc.getSocketFactory();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+
+        return ssfFactory;
+    }
+
+    //获取HostnameVerifier
+    protected HostnameVerifier createTrustAllHostnameVerifier() {
+        return new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        };
     }
 }
