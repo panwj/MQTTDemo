@@ -26,6 +26,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".DemoActivity"
+            android:screenOrientation="portrait"/>
+
         <!-- Mqtt Service -->
         <service android:name="org.eclipse.paho.android.service.MqttService" />
     </application>
