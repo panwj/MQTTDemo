@@ -111,7 +111,7 @@ public class MqttManager {
 
                 Log.e(TAG, "mqttConnectOptions --> " + mqttConnectOptions.toString());
 
-                mMqttAndroidClient.setDebugUnregister(false);
+//                mMqttAndroidClient.setDebugUnregister(false);
                 mMqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken) {
@@ -129,7 +129,7 @@ public class MqttManager {
                         Log.e(TAG, "doConnect() ---> onFailure() : " + (exception != null ? exception.toString() : null));
                     }
                 });
-            } catch (MqttException e){
+            } catch (MqttException e) {
                 e.printStackTrace();
                 Log.e(TAG, "doConnect()  exception : " + e.toString());
             }
