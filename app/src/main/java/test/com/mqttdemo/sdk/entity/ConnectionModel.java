@@ -1,5 +1,7 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk.entity;
 
+
+import test.com.mqttdemo.sdk.Connection;
 
 public class ConnectionModel {
 

@@ -1,4 +1,4 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk;
 
 
 import android.content.Context;
@@ -17,6 +17,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import test.com.mqttdemo.R;
+import test.com.mqttdemo.sdk.entity.ReceivedMessage;
+import test.com.mqttdemo.sdk.entity.Subscription;
+import test.com.mqttdemo.sdk.listener.ActionListener;
+import test.com.mqttdemo.sdk.listener.IReceivedMessageListener;
 
 /**
  * Represents a {@link MqttAndroidClient} and the actions it has performed
@@ -214,7 +220,7 @@ public class Connection {
         String timestamp = context.getString(R.string.timestamp, args);
         history.add(action + timestamp);
 
-        notifyListeners(new PropertyChangeEvent(this, ActivityConstants.historyProperty, null, null));
+        notifyListeners(new PropertyChangeEvent(this, IMConstants.historyProperty, null, null));
     }
 
     /**
@@ -242,7 +248,7 @@ public class Connection {
      */
     public void changeConnectionStatus(ConnectionStatus connectionStatus) {
         status = connectionStatus;
-        notifyListeners((new PropertyChangeEvent(this, ActivityConstants.ConnectionStatusProperty, null, null)));
+        notifyListeners((new PropertyChangeEvent(this, IMConstants.ConnectionStatusProperty, null, null)));
     }
 
     /**
@@ -334,7 +340,6 @@ public class Connection {
      */
     public void addConnectionOptions(MqttConnectOptions connectOptions) {
         mqttConnectOptions = connectOptions;
-
     }
 
     /**

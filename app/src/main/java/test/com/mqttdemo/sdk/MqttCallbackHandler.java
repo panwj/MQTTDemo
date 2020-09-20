@@ -10,20 +10,22 @@
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  */
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import test.com.mqttdemo.Connections;
+import test.com.mqttdemo.R;
+
 /**
  * Handles call backs from the MQTT Client
  */
-class MqttCallbackHandler implements MqttCallback {
+public class MqttCallbackHandler implements MqttCallback {
 
     /**
      * {@link Context} for the application used to format and import external strings

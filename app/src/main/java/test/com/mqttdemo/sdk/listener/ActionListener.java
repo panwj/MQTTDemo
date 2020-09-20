@@ -1,4 +1,4 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk.listener;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,6 +11,13 @@ import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.util.ArrayList;
+
+import test.com.mqttdemo.sdk.Connection;
+import test.com.mqttdemo.Connections;
+import test.com.mqttdemo.sdk.Logger;
+import test.com.mqttdemo.R;
+import test.com.mqttdemo.sdk.Notify;
+import test.com.mqttdemo.sdk.entity.Subscription;
 
 /**
  * This Class handles receiving information from the
@@ -25,7 +32,7 @@ public class ActionListener implements IMqttActionListener {
      * Actions that can be performed Asynchronously <strong>and</strong> associated with a
      * {@link ActionListener} object
      */
-    enum Action {
+    public enum Action {
         /**
          * Connect Action
          **/

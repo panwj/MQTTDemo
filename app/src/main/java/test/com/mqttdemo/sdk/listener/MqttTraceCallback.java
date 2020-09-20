@@ -10,13 +10,13 @@
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  */
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk.listener;
 
 import android.util.Log;
 
 import org.eclipse.paho.android.service.MqttTraceHandler;
 
-class MqttTraceCallback implements MqttTraceHandler {
+public class MqttTraceCallback implements MqttTraceHandler {
 
     public void traceDebug(java.lang.String arg0, java.lang.String arg1) {
         Log.i(arg0, arg1);

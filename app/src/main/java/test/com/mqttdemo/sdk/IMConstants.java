@@ -1,6 +1,6 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk;
 
-class ActivityConstants {
+public class IMConstants {
 
     /**
      * Bundle key for passing a connection around by it's name
@@ -27,5 +27,5 @@ class ActivityConstants {
     /**
      * Empty String for comparisons
      **/
-    static final String empty = "";
+    public static final String empty = "";
 }

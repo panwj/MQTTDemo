@@ -17,11 +17,11 @@ package test.com.mqttdemo;
 
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import test.com.mqttdemo.sdk.Connection;
 
 /**
  * <code>Connections</code> is a singleton class which stores all the connection objects

@@ -10,7 +10,7 @@
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  */
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -19,10 +19,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+import test.com.mqttdemo.R;
+
 /**
  * Provides static methods for creating and showing notifications to the user.
  */
-class Notify {
+public class Notify {
 
     /**
      * Message ID Counter
@@ -37,7 +39,7 @@ class Notify {
      * @param intent            The intent which will start the activity when the user clicks the notification
      * @param notificationTitle The resource reference to the notification title
      */
-    static void notifcation(Context context, String messageString, Intent intent, int notificationTitle) {
+    public static void notifcation(Context context, String messageString, Intent intent, int notificationTitle) {
 
         //Get the notification manage which we will use to display the notification
         String ns = Context.NOTIFICATION_SERVICE;
@@ -79,7 +81,7 @@ class Notify {
      * @param text     The text the toast should display
      * @param duration The amount of time for the toast to appear to the user
      */
-    static void toast(Context context, CharSequence text, @SuppressWarnings("SameParameterValue") int duration) {
+    public static void toast(Context context, CharSequence text, @SuppressWarnings("SameParameterValue") int duration) {
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
     }

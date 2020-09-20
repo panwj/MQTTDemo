@@ -1,4 +1,4 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk.entity;
 
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 

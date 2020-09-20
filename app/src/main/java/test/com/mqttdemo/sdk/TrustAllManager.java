@@ -1,4 +1,4 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

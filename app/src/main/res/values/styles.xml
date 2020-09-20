@@ -7,4 +7,17 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
+        <!-- TabLayout指示器的颜色 -->
+        <item name="tabIndicatorColor">@color/colorAccent</item>
+        <!-- tab默认字体的颜色 -->
+        <item name="tabTextColor">#D2D5DA</item>
+        <!-- 当前选择的tab的字体颜色 -->
+        <item name="tabSelectedTextColor">#00ACFD</item>
+        <!-- 背景 -->
+        <item name="tabBackground">@drawable/bg_tab_border_selector</item>
+        <!-- TabLayout指示器高度 -->
+        <item name="tabIndicatorHeight">0dp</item>
+    </style>
+
 </resources>

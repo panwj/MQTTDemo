@@ -21,6 +21,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import test.com.mqttdemo.sdk.TrustAllManager;
+
 public class MqttManager {
 
     private static final String TAG = "MqttManager";

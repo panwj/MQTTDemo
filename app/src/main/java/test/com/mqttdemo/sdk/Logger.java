@@ -1,4 +1,4 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk;
 
 import android.util.Log;
 

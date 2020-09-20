@@ -1,7 +1,6 @@
 package test.com.mqttdemo;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -19,6 +18,16 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+
+import test.com.mqttdemo.sdk.Connection;
+import test.com.mqttdemo.sdk.IMConstants;
+import test.com.mqttdemo.sdk.Logger;
+import test.com.mqttdemo.sdk.MqttCallbackHandler;
+import test.com.mqttdemo.sdk.TrustAllManager;
+import test.com.mqttdemo.sdk.entity.ConnectionModel;
+import test.com.mqttdemo.sdk.entity.Subscription;
+import test.com.mqttdemo.sdk.listener.ActionListener;
+import test.com.mqttdemo.sdk.listener.MqttTraceCallback;
 
 public class DemoActivity extends AppCompatActivity {
 
@@ -179,14 +188,14 @@ public class DemoActivity extends AppCompatActivity {
         connOpts.setCleanSession(model.isCleanSession());
         connOpts.setConnectionTimeout(model.getTimeout());
         connOpts.setKeepAliveInterval(model.getKeepAlive());
-        if (!model.getUsername().equals(ActivityConstants.empty)) {
+        if (!model.getUsername().equals(IMConstants.empty)) {
             connOpts.setUserName(model.getUsername());
         }
 
-        if (!model.getPassword().equals(ActivityConstants.empty)) {
+        if (!model.getPassword().equals(IMConstants.empty)) {
             connOpts.setPassword(model.getPassword().toCharArray());
         }
-        if (!model.getLwtTopic().equals(ActivityConstants.empty) && !model.getLwtMessage().equals(ActivityConstants.empty)) {
+        if (!model.getLwtTopic().equals(IMConstants.empty) && !model.getLwtMessage().equals(IMConstants.empty)) {
 //            connOpts.setWill(model.getLwtTopic(), model.getLwtMessage().getBytes(), model.getLwtQos(), model.isLwtRetain());
         }
 
@@ -231,7 +240,7 @@ public class DemoActivity extends AppCompatActivity {
         public void propertyChange(PropertyChangeEvent event) {
             Logger.d("propertyChange() ---> " + event);
 
-            if (!event.getPropertyName().equals(ActivityConstants.ConnectionStatusProperty)) {
+            if (!event.getPropertyName().equals(IMConstants.ConnectionStatusProperty)) {
                 return;
             }
 

@@ -1,5 +1,7 @@
-package test.com.mqttdemo;
+package test.com.mqttdemo.sdk.listener;
 
+
+import test.com.mqttdemo.sdk.entity.ReceivedMessage;
 
 public interface IReceivedMessageListener {
 

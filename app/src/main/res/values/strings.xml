@@ -8,6 +8,10 @@
         <item name="qos_2">2</item>
     </string-array>
 
+    <string name="main_receiver">Receiver</string>
+    <string name="main_sender">Sender</string>
+    <string name="main_contacts">Clients</string>
+    <string name="main_setting">Setting</string>
 
 
     <string name="action_add_connection">Add Connection</string>
