@@ -28,7 +28,7 @@
 
     </RelativeLayout>
 
-    <test.com.mqttdemo.thirdparty.NoScrollViewPager
+    <com.mavl.im.thirdparty.NoScrollViewPager
         android:id="@+id/vp_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
