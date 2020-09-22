@@ -19,17 +19,15 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-import com.mavl.im.R;
-import com.mavl.im.Connections;
-import com.mavl.im.sdk.Connection;
+import com.mavl.im.demo.Connection;
 import com.mavl.im.sdk.IMConstants;
 import com.mavl.im.sdk.Logger;
-import com.mavl.im.sdk.MqttCallbackHandler;
+import com.mavl.im.demo.MqttCallbackHandler;
 import com.mavl.im.sdk.TrustAllManager;
-import com.mavl.im.sdk.entity.ConnectionModel;
-import com.mavl.im.sdk.entity.Subscription;
-import com.mavl.im.sdk.listener.ActionListener;
-import com.mavl.im.sdk.listener.MqttTraceCallback;
+import com.mavl.im.demo.ConnectionModel;
+import com.mavl.im.demo.Subscription;
+import com.mavl.im.demo.ActionListener;
+import com.mavl.im.demo.MqttTraceCallback;
 
 public class DemoActivity extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package com.mavl.im.sdk;
+package com.mavl.im.demo;
 
 
 import android.content.Context;
@@ -19,10 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.mavl.im.R;
-import com.mavl.im.sdk.entity.ReceivedMessage;
-import com.mavl.im.sdk.entity.Subscription;
-import com.mavl.im.sdk.listener.ActionListener;
-import com.mavl.im.sdk.listener.IReceivedMessageListener;
+import com.mavl.im.sdk.IMConstants;
+import com.mavl.im.sdk.Logger;
 
 /**
  * Represents a {@link MqttAndroidClient} and the actions it has performed

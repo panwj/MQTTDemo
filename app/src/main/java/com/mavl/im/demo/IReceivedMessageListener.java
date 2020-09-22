@@ -1,7 +1,6 @@
-package com.mavl.im.sdk.listener;
+package com.mavl.im.demo;
 
 
-import com.mavl.im.sdk.entity.ReceivedMessage;
 
 public interface IReceivedMessageListener {
 

@@ -1,5 +1,7 @@
 package com.mavl.im.sdk;
 
+import com.mavl.im.demo.Connection;
+
 public class IMConstants {
 
     /**

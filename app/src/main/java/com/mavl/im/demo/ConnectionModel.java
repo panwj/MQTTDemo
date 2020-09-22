@@ -1,7 +1,5 @@
-package com.mavl.im.sdk.entity;
+package com.mavl.im.demo;
 
-
-import com.mavl.im.sdk.Connection;
 
 public class ConnectionModel {
 

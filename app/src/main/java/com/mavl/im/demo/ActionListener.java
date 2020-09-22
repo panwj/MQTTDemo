@@ -1,4 +1,4 @@
-package com.mavl.im.sdk.listener;
+package com.mavl.im.demo;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -12,12 +12,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.util.ArrayList;
 
-import com.mavl.im.sdk.Connection;
 import com.mavl.im.Connections;
 import com.mavl.im.sdk.Logger;
 import com.mavl.im.R;
-import com.mavl.im.sdk.Notify;
-import com.mavl.im.sdk.entity.Subscription;
 
 /**
  * This Class handles receiving information from the

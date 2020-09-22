@@ -10,7 +10,7 @@
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  */
-package com.mavl.im.sdk.listener;
+package com.mavl.im.demo;
 
 import android.util.Log;
 

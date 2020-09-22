@@ -1,4 +1,4 @@
-package com.mavl.im.sdk.entity;
+package com.mavl.im.demo;
 
 
 public class Subscription {

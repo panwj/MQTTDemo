@@ -10,7 +10,7 @@
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  */
-package com.mavl.im.sdk;
+package com.mavl.im.demo;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +21,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.mavl.im.Connections;
 import com.mavl.im.R;
+import com.mavl.im.sdk.Logger;
 
 /**
  * Handles call backs from the MQTT Client

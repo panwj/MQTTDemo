@@ -21,7 +21,7 @@ import android.content.Context;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.mavl.im.sdk.Connection;
+import com.mavl.im.demo.Connection;
 
 /**
  * <code>Connections</code> is a singleton class which stores all the connection objects
