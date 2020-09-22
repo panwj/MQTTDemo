@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class Logger {
 
-    private static final String TAG = "MQTT_TEST";
+    private static final String TAG = "MAVL_MQTT";
 
     public static void e(String string) {
         Log.e(TAG, string);

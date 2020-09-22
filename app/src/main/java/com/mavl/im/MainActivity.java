@@ -1,13 +1,11 @@
 package com.mavl.im;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-import com.mavl.im.R;
 import com.mavl.im.main.MainFragment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private MainFragment mMainFragment;
 

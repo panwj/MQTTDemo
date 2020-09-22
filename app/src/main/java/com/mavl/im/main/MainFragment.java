@@ -27,8 +27,8 @@ public class MainFragment extends BaseFragment implements View.OnClickListener {
     private TabLayout mTabLayout;
     private MainViewPagerAdapter mAdapter;
     private LinkedList<BaseFragment> mFragments = new LinkedList<>();
-    private ClientFragment mReceiverFragment;
-    private ClientFragment mSenderFragment;
+    private ReceiverFragment mReceiverFragment;
+    private SenderFragment mSenderFragment;
     private ContactFragment mClientsFragment;
     private SettingFragment mSettingFragment;
     private TextView mTitle;
@@ -99,7 +99,20 @@ public class MainFragment extends BaseFragment implements View.OnClickListener {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 super.onTabSelected(tab);
-                updatePageTitle(tab.getPosition());
+                int position = tab.getPosition();
+                updatePageTitle(position);
+                switch (position) {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        if (mClientsFragment != null) mClientsFragment.updateData();
+                        break;
+                    case 3:
+                        mTitle.setText("Setting");
+                        break;
+                }
             }
 
             @Override
@@ -116,8 +129,8 @@ public class MainFragment extends BaseFragment implements View.OnClickListener {
     }
 
     private void addFragment() {
-        mReceiverFragment = new ClientFragment();
-        mSenderFragment = new ClientFragment();
+        mReceiverFragment = new ReceiverFragment();
+        mSenderFragment = new SenderFragment();
         mClientsFragment = new ContactFragment();
         mSettingFragment = new SettingFragment();
         mFragments.add(mReceiverFragment);
@@ -146,10 +159,10 @@ public class MainFragment extends BaseFragment implements View.OnClickListener {
     private void updatePageTitle(int position) {
         switch (position) {
             case 0:
-                mTitle.setText("Client receiver");
+                mTitle.setText(mReceiverFragment != null ? mReceiverFragment.getClientName() : "Client receiver");
                 break;
             case 1:
-                mTitle.setText("Client sender");
+                mTitle.setText(mSenderFragment != null ? mSenderFragment.getClientName() : "Client sender");
                 break;
             case 2:
                 mTitle.setText("Clients");
