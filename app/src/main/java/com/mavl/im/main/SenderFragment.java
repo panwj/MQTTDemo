@@ -22,8 +22,12 @@ import com.mavl.im.BaseFragment;
 import com.mavl.im.IMManager;
 import com.mavl.im.R;
 import com.mavl.im.sdk.IMConnectionClient;
+import com.mavl.im.sdk.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
+import com.mavl.im.sdk.listener.IMCallback;
+import com.mavl.im.sdk.listener.IMReceivedMessageListener;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.ArrayList;
@@ -101,6 +105,29 @@ public class SenderFragment extends BaseFragment {
                 }
             }
         });
+
+        client.setIMCallback(new IMCallback() {
+            @Override
+            public void connectionLost(Throwable cause) {
+                Logger.e("client2 ---->  connectionLost() : " + (cause != null ? cause.toString() : null));
+            }
+
+            @Override
+            public void messageArrived(String topic, IMMessage message) throws Exception {
+                Logger.d("client2 ---->  topic : " + topic + "    message : " + (message != null ? message.toString() : null));
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+                Logger.d("client2 ----> deliveryComplete() " + (token != null ? token.toString() : null));
+            }
+        });
+       /* client.setIMReceivedMessageListener(new IMReceivedMessageListener() {
+            @Override
+            public void onMessageReceived(IMMessage message) {
+                Logger.e("client2 ----> onMessageReceived() : " + message);
+            }
+        });*/
     }
 
     public String getClientName() {

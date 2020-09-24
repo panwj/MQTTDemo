@@ -1,7 +1,8 @@
 package com.mavl.im.sdk.listener;
 
+import com.mavl.im.sdk.entity.IMMessage;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public interface IMCallback {
     /**
@@ -42,7 +43,7 @@ public interface IMCallback {
      * @throws Exception if a terminal error has occurred, and the client should be
      * shut down.
      */
-    public void messageArrived(String topic, MqttMessage message) throws Exception;
+    public void messageArrived(String topic, IMMessage message) throws Exception;
 
     /**
      * Called when delivery for a message has been completed, and all

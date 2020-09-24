@@ -334,14 +334,13 @@ public class IMConnectionClient {
                     IMMessage received = new IMMessage();
 
                     if (message != null) {
-                        received.payload = message.getPayload().toString();
+                        received.payload = new String(message.getPayload());
                         received.dup = message.isDuplicate();
                         received.retained = message.isRetained();
                         received.qos = message.getQos();
                         received.timeStamp = System.currentTimeMillis();
                     }
                     imReceivedMessageListener.onMessageReceived(received);
-                    imReceivedMessageListener.onMessageReceived(topic, message);
                 }
             }
         });
@@ -408,7 +407,19 @@ public class IMConnectionClient {
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     Logger.e("setCallback ---> messageArrived() topic : " + topic + "   message : "  + (message != null ? message.toString() : null));
 
-                    if (imCallback != null) imCallback.messageArrived(topic, message);
+                    if (imCallback != null) {
+                        IMMessage received = new IMMessage();
+
+                        if (message != null) {
+                            received.payload = new String(message.getPayload());
+                            received.dup = message.isDuplicate();
+                            received.retained = message.isRetained();
+                            received.qos = message.getQos();
+                            received.timeStamp = System.currentTimeMillis();
+                        }
+
+                        imCallback.messageArrived(topic, received);
+                    }
                 }
 
                 @Override

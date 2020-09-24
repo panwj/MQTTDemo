@@ -44,8 +44,7 @@ public class ReceiverFragment extends BaseFragment {
     private Button button;
     private IMConnectionClient client;
     private MessageAdapter adapter;
-    private List<MqttMessage> mList;
-    private List<String> mTopicList;
+    private List<IMMessage> mList;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,7 +69,6 @@ public class ReceiverFragment extends BaseFragment {
 
     private void initView(View view) {
         mList = new ArrayList<>();
-        mTopicList = new ArrayList<>();
 
         recyclerView = view.findViewById(R.id.rv);
         recyclerView = view.findViewById(R.id.rv);
@@ -84,7 +82,6 @@ public class ReceiverFragment extends BaseFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         adapter = new MessageAdapter();
         recyclerView.setAdapter(adapter);
-        updateData();
 
         publicText = view.findViewById(R.id.edit_public);
         editText = view.findViewById(R.id.edit);
@@ -94,11 +91,24 @@ public class ReceiverFragment extends BaseFragment {
             public void onClick(View v) {
                 Editable editable = editText.getText();
                 String text = editable.toString();
-                if (TextUtils.isEmpty(text)) {
+                String topic = publicText.getText().toString();
+
+                if (TextUtils.isEmpty(text) || TextUtils.isEmpty(topic)) {
                     Toast.makeText(getActivity(), "message not empty...", Toast.LENGTH_SHORT).show();
                     return;
+                }
 
-
+                IMMessage message = new IMMessage();
+                message.messageClientId = 122;
+                message.qos = 0;
+                message.retained = true;
+                message.payload = text;
+                try {
+                    client.publish(topic, message, null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    updateData(message);
                 }
             }
         });
@@ -106,32 +116,25 @@ public class ReceiverFragment extends BaseFragment {
         client.setIMCallback(new IMCallback() {
             @Override
             public void connectionLost(Throwable cause) {
-
+                Logger.e("client1 ---->  connectionLost() : " + (cause != null ? cause.toString() : null));
             }
 
             @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
+            public void messageArrived(String topic, IMMessage message) throws Exception {
+                Logger.d("client1 ---->  topic : " + topic + "    message : " + (message != null ? message.toString() : null));
 
+                mList.add(message);
             }
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {
-
+                Logger.d("client1 ----> deliveryComplete() " + (token != null ? token.toString() : null));
             }
         });
-
         client.setIMReceivedMessageListener(new IMReceivedMessageListener() {
             @Override
             public void onMessageReceived(IMMessage message) {
-                Logger.d("receiver IMMessage : " + message.toString());
-            }
-
-            @Override
-            public void onMessageReceived(String topic, MqttMessage message) {
-                Logger.d("receiver topic : " + topic + "MqttMessage : " + message.toString());
-
-                mList.add(message);
-                mTopicList.add(topic);
+                Logger.e("client1 ----> onMessageReceived() : " + message);
             }
         });
     }
@@ -140,27 +143,23 @@ public class ReceiverFragment extends BaseFragment {
         return client != null ? client.getClientId() : "Receiver";
     }
 
-    private void updateData() {
-        if (adapter != null) adapter.updateList(mList, mTopicList);
+    private void updateData(IMMessage message) {
+        if (mList == null) mList = new ArrayList<>();
+        mList.add(message);
+        if (adapter != null) adapter.updateList(mList);
     }
 
     private class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
-        private List<MqttMessage> mList;
-        private List<String> mTopicList;
+        private List<IMMessage> mList;
 
         /**
          * 刷新列表数据。
          */
-        public void updateList(List<MqttMessage> list,  List<String> topicList) {
+        public void updateList(List<IMMessage> list) {
             if (mList == null) mList = new ArrayList<>();
             mList.clear();
             if (list != null) mList.addAll(list);
-
-            if (mTopicList == null) mTopicList = new ArrayList<>();
-            mTopicList.clear();
-            if (topicList != null) mTopicList.addAll(topicList);
-
             notifyDataSetChanged();
         }
 
@@ -173,7 +172,7 @@ public class ReceiverFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            holder.bindView(mList.get(position), mTopicList.get(position));
+            holder.bindView(mList.get(position));
         }
 
         @Override
@@ -191,9 +190,9 @@ public class ReceiverFragment extends BaseFragment {
                 tvSend = itemView.findViewById(R.id.tv_send);
             }
 
-            public void bindView(MqttMessage message, String topic) {
+            public void bindView(IMMessage message) {
 
-                tvReceived.setText(topic + " : " + message.toString());
+                tvReceived.setText(message.toString());
             }
         }
     }
