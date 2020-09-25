@@ -37,7 +37,7 @@ public class IMManager {
                 .setTimeout(30)
                 .setKeepAlive(60)
                 .setTlsConnection(true)
-                .setCleanSession(false)
+                .setCleanSession(true)
                 .build();
         IMConnectionClient client1 = IMConnectionClient.createConnectClient(mContext, config1);
 
@@ -53,7 +53,7 @@ public class IMManager {
                 .setTimeout(30)
                 .setKeepAlive(60)
                 .setTlsConnection(true)
-                .setCleanSession(false)
+                .setCleanSession(true)
                 .build();
         IMConnectionClient client2 = IMConnectionClient.createConnectClient(mContext, config2);
         addClient(client2);
