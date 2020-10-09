@@ -3,11 +3,17 @@ package com.mavl.im.sdk.listener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 
 public interface IMClientListener {
+
+    /**
+     * 开始连接
+     */
+    void onConnecting();
+
     /**
      * This method is invoked when an action has completed successfully.
      * @param asyncActionToken associated with the action that has completed
      */
-    public void onConnectSuccess(IMqttToken asyncActionToken);
+    void onConnectSuccess(IMqttToken asyncActionToken);
     /**
      * This method is invoked when an action fails.
      * If a client is disconnected while an action is in progress
@@ -18,21 +24,14 @@ public interface IMClientListener {
      * @param asyncActionToken associated with the action that has failed
      * @param exception thrown by the action that has failed
      */
-    public void onConnectFailure(IMqttToken asyncActionToken, Throwable exception);
+    void onConnectFailure(IMqttToken asyncActionToken, Throwable exception);
 
-    public void onDisConnectSuccess(IMqttToken asyncActionToken);
+    /**
+     * 开始断开连接
+     */
+    void onDisConnecting();
 
-    public void onDisConnectFailure(IMqttToken asyncActionToken, Throwable exception);
+    void onDisConnectSuccess(IMqttToken asyncActionToken);
 
-    public void onPublishSuccess(IMqttToken asyncActionToken);
-
-    public void onPublishFailure(IMqttToken asyncActionToken, Throwable exception);
-
-    public void onSubscribeSuccess(IMqttToken asyncActionToken);
-
-    public void onSubscribeFailure(IMqttToken asyncActionToken, Throwable exception);
-
-    public void onUnSubscribeSuccess(IMqttToken asyncActionToken);
-
-    public void onUnSubscribeFailure(IMqttToken asyncActionToken, Throwable exception);
+    void onDisConnectFailure(IMqttToken asyncActionToken, Throwable exception);
 }

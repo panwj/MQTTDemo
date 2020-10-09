@@ -5,13 +5,13 @@ import android.os.Parcelable;
 
 public class IMMessage implements Parcelable {
 
-    public int messageId;
-    public int messageClientId;
-    public String payload;
-    public int qos = 1;
+    public int messageId;//消息的真实ID，由后台返回
+    public int messageClientId = hashCode();//消息的本地ID，用于与后台返回的消息体对应
+    public String payload;//消息内容
+    public int qos = 1;//operation, 0: 消息最多分发一次； 1：消息最少分发一次； 2：消息只分发一次
     public boolean retained = true;
     public boolean dup = false;
-    public long timeStamp;
+    public long timeStamp;//生成消息的时间戳，纳秒
 
     public static final Creator<IMMessage> CREATOR = new Creator<IMMessage>() {
 

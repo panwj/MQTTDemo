@@ -6,11 +6,14 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.mavl.im.sdk.config.IMClientConfig;
+import com.mavl.im.sdk.config.IMGlobalConfig;
+import com.mavl.im.sdk.config.TopicConfig;
 import com.mavl.im.sdk.entity.IMMessage;
 import com.mavl.im.sdk.entity.IMSubscribe;
 import com.mavl.im.sdk.listener.ConnectionStatus;
 import com.mavl.im.sdk.listener.IMCallback;
 import com.mavl.im.sdk.listener.IMClientListener;
+import com.mavl.im.sdk.listener.IMMessageStatusListener;
 import com.mavl.im.sdk.listener.IMReceivedMessageListener;
 import com.mavl.im.sdk.listener.IMTraceCallback;
 
@@ -21,6 +24,7 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -38,16 +42,6 @@ public class IMConnectionClient {
     private static final int DEFAULT_CONNECT_TIMEOUT_TIMES = 30;
 
     private Context mContext;
-
-    /**
-     * The host that the {@link MqttAndroidClient} represented by this <code>Connection</code> is represented by
-     **/
-    private String host;
-
-    /**
-     * The port on the server that this client is connecting to
-     **/
-    private int port;
 
     /**
      * The clientId of the client associated with this <code>Connection</code> object
@@ -80,15 +74,13 @@ public class IMConnectionClient {
 
     private IMReceivedMessageListener imReceivedMessageListener;
 
-    private IMCallback imCallback;
+    private IMMessageStatusListener imMessageStatusListener;
 
     private IMTraceCallback imTraceCallback;
 
 
     private IMConnectionClient(Context context, MqttAndroidClient client, @NonNull IMClientConfig config) {
         this.mContext = context;
-        this.host = config.host;
-        this.port = config.port;
         this.clientId = config.clientId;
         this.tlsConnection = config.tlsConnection;
         this.imClientConfig = config;
@@ -99,36 +91,13 @@ public class IMConnectionClient {
     public static IMConnectionClient createConnectClient(Context context, @NonNull IMClientConfig config) {
         String uri;
         if (config.tlsConnection) {
-            uri = "ssl://" + config.host + ":" + config.port;
+            uri = "ssl://" + IMGlobalConfig.getHost() + ":" + IMGlobalConfig.getPort();
         } else {
-            uri = "tcp://" + config.host + ":" + config.port;
+            uri = "tcp://" + IMGlobalConfig.getHost() + ":" + IMGlobalConfig.getPort();
         }
         MqttAndroidClient client = new MqttAndroidClient(context, uri, config.clientId);
 
         return new IMConnectionClient(context, client, config);
-    }
-
-    /**
-     * Connects to an IM server using the default options.
-     * <p>
-     * The default options are specified in {@link MqttConnectOptions} class.
-     * </p>
-     *
-     * @throws MqttException
-     *             for any connected problems
-     * @return token used to track and wait for the connect to complete. The
-     *         token will be passed to the callback methods if a callback is
-     *         set.
-     * @hide
-     */
-
-    public IMqttToken doConnect() throws MqttException {
-        if (this.mqttAndroidClient == null) throw new NullPointerException("MqttAndroidClient is null");
-        if (this.mqttConnectOptions != null) {
-            return this.mqttAndroidClient.connect();
-        } else {
-            return this.mqttAndroidClient.connect(this.mqttConnectOptions);
-        }
     }
 
     /**
@@ -147,9 +116,12 @@ public class IMConnectionClient {
      */
     public IMqttToken doConnect(Object userContext) throws MqttException {
         status = ConnectionStatus.CONNECTING;
+        if (imClientListener != null) imClientListener.onConnecting();
         if (this.mqttAndroidClient == null) {
             status = ConnectionStatus.ERROR;
-            throw new NullPointerException("MqttAndroidClient is null");
+            if (imClientListener != null)
+                imClientListener.onConnectFailure(null, new Throwable("MqttAndroidClient is null"));
+            return null;
         }
 
         Logger.e("==>==>==>==>==>==>==>==>  doConnect(START)  <====<==<==<==<==<==<==<==");
@@ -164,7 +136,6 @@ public class IMConnectionClient {
                     Logger.d("client ---> doConnect()  success...");
                     status = ConnectionStatus.CONNECTED;
 
-
                     if (imClientListener != null) imClientListener.onConnectSuccess(asyncActionToken);
                 }
 
@@ -172,7 +143,6 @@ public class IMConnectionClient {
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     Logger.e("client ---> doConnect()  failed  " + "<exception> " + (exception != null ? exception.toString() : null) + " <exception> IMqttToken : " + asyncActionToken);
                     status = ConnectionStatus.ERROR;
-
 
                     if (imClientListener != null) imClientListener.onConnectFailure(asyncActionToken, exception);
                 }
@@ -184,7 +154,6 @@ public class IMConnectionClient {
                     Logger.d("client ---> doConnect()  success...");
                     status = ConnectionStatus.CONNECTED;
 
-
                     if (imClientListener != null) imClientListener.onConnectSuccess(asyncActionToken);
                 }
 
@@ -192,7 +161,6 @@ public class IMConnectionClient {
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     Logger.e("client ---> doConnect()  failed  " + "<exception> " + (exception != null ? exception.toString() : null) + " <exception> IMqttToken : " + asyncActionToken);
                     status = ConnectionStatus.ERROR;
-
 
                     if (imClientListener != null) imClientListener.onConnectFailure(asyncActionToken, exception);
                 }
@@ -222,7 +190,13 @@ public class IMConnectionClient {
      * @hide
      */
     public IMqttToken disConnect(long quiesceTimeout) throws MqttException {
-        if (mqttAndroidClient == null) return null;
+        status = ConnectionStatus.DISCONNECTING;
+        if (mqttAndroidClient == null) {
+            status = ConnectionStatus.ERROR;
+            return null;
+        }
+        status = ConnectionStatus.DISCONNECTED;
+        if (!isConnect()) return null;
         if (quiesceTimeout < 0) {
             return  mqttAndroidClient.disconnect();
         } else {
@@ -232,17 +206,22 @@ public class IMConnectionClient {
 
     public IMqttToken disConnect(long quiesceTimeout, Object userContext) throws MqttException {
         status = ConnectionStatus.DISCONNECTING;
+        if (imClientListener != null) imClientListener.onDisConnecting();
+
         if (mqttAndroidClient == null) {
             status = ConnectionStatus.ERROR;
+            if (imClientListener != null)
+                imClientListener.onDisConnectFailure(null, new Throwable("MqttAndroidClient is null"));
             return null;
         }
+        status = ConnectionStatus.DISCONNECTED;
+        if (!isConnect()) return null;
         if (quiesceTimeout < 0) {
             return mqttAndroidClient.disconnect(userContext, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Logger.d("client ---> disConnect()  success...");
                     status = ConnectionStatus.DISCONNECTED;
-
 
                     if (imClientListener != null) imClientListener.onDisConnectSuccess(asyncActionToken);
                 }
@@ -270,36 +249,144 @@ public class IMConnectionClient {
                     Logger.e("client ---> disConnect()  failed  " + "<exception> " + (exception != null ? exception.toString() : null) + " <exception> IMqttToken : " + asyncActionToken);
                     status = ConnectionStatus.ERROR;
 
-
                     if (imClientListener != null) imClientListener.onDisConnectFailure(asyncActionToken, exception);
                 }
             });
         }
     }
 
-    public void publish(String topic, IMMessage imMessage, Object userContext) throws MqttException {
-        if (mqttAndroidClient == null) throw new NullPointerException("MqttAndroidClient is null");
-        if (imMessage == null) throw new NullPointerException("IMMessage is null");
+    public void publishOneToOne(String toUid, String msg, Object userContext) throws MqttException {
+        if (TextUtils.isEmpty(toUid)) {
+            Logger.e("publishOneToOne() toUid empty tip!!!");
+            return;
+        }
+        if (TextUtils.isEmpty(msg)) {
+            Logger.e("publishOneToOne() msg empty tip!!!");
+            return;
+        }
 
+        IMMessage imMessage = new IMMessage();
+//        imMessage.messageClientId = imMessage.hashCode();
+        imMessage.payload = msg;
+        imMessage.timeStamp = System.nanoTime();
+        imMessage.qos = 1;
+        imMessage.retained = true;
+
+        String topic = TopicConfig.createOneToOneTopic(String.valueOf(imMessage.messageClientId), toUid);
+        publishMsg(topic, imMessage, userContext);
+    }
+
+    public void publishOneToOne(String toUid, IMMessage imMessage, Object userContext) throws MqttException {
+        if (imMessage == null) throw new MqttException(new Throwable("IMMessage is null"));
+        if (TextUtils.isEmpty(toUid)) {
+            Logger.e("publishOneToOne() toUid empty tip!!!");
+            return;
+        }
+        if (TextUtils.isEmpty(imMessage.payload)) {
+            Logger.e("publishOneToOne() msg empty tip!!!");
+            return;
+        }
+
+        String topic = TopicConfig.createOneToOneTopic(String.valueOf(imMessage.messageClientId), toUid);
+        publishMsg(topic, imMessage, userContext);
+    }
+
+    public void createGroup(Object userContext) throws MqttException {
+        IMMessage imMessage = new IMMessage();
+        imMessage.payload = "";
+        imMessage.timeStamp = System.nanoTime();
+        imMessage.qos = 1;
+        imMessage.retained = true;
+
+        String topic = TopicConfig.createGroupTopic(String.valueOf(imMessage.messageClientId));
+        publishMsg(topic, imMessage, userContext);
+    }
+
+    public void addGroup(String gid, Object userContext) throws MqttException {
+        IMMessage imMessage = new IMMessage();
+        imMessage.payload = "";
+        imMessage.timeStamp = System.nanoTime();
+        imMessage.qos = 1;
+        imMessage.retained = true;
+
+        String topic = TopicConfig.createAddGroupTopic(String.valueOf(imMessage.messageClientId), gid);
+        publishMsg(topic, imMessage, userContext);
+    }
+
+    public void quitGroup(String gid, Object userContext) throws MqttException {
+        IMMessage imMessage = new IMMessage();
+        imMessage.payload = "";
+        imMessage.timeStamp = System.nanoTime();
+        imMessage.qos = 1;
+        imMessage.retained = true;
+
+        String topic = TopicConfig.createQuitGroupTopic(String.valueOf(imMessage.messageClientId), gid);
+        publishMsg(topic, imMessage, userContext);
+    }
+
+    public void publishToGroup(String toGid, String msg, Object userContext, boolean isVirtual) throws MqttException {
+        if (TextUtils.isEmpty(toGid)) {
+            Logger.e("publishToGroup() toUid empty tip!!!");
+            return;
+        }
+        if (TextUtils.isEmpty(msg)) {
+            Logger.e("publishToGroup() msg empty tip!!!");
+            return;
+        }
+
+        IMMessage imMessage = new IMMessage();
+        imMessage.payload = msg;
+        imMessage.timeStamp = System.nanoTime();
+        imMessage.qos = 1;
+        imMessage.retained = true;
+
+        String topic = isVirtual ? TopicConfig.createVirtualToGroupTopic(String.valueOf(imMessage.messageClientId), toGid)
+                : TopicConfig.createOneToGroupTopic(String.valueOf(imMessage.messageClientId), toGid);
+        publishMsg(topic, imMessage, userContext);
+    }
+
+    public void publishToGroup(String toGid, IMMessage imMessage, Object userContext, boolean isVirtual) throws MqttException {
+        if (imMessage == null) throw new MqttException(new Throwable("IMMessage is null"));
+        if (TextUtils.isEmpty(toGid)) {
+            Logger.e("publishToGroup() toUid empty tip!!!");
+            return;
+        }
+        if (TextUtils.isEmpty(imMessage.payload)) {
+            Logger.e("publishToGroup() msg empty tip!!!");
+            return;
+        }
+
+        String topic = isVirtual ? TopicConfig.createVirtualToGroupTopic(String.valueOf(imMessage.messageClientId), toGid)
+                : TopicConfig.createOneToGroupTopic(String.valueOf(imMessage.messageClientId), toGid);
+        publishMsg(topic, imMessage, userContext);
+    }
+
+    private void publishMsg(String topic, IMMessage imMessage, Object userContext) throws MqttException {
+        if (mqttAndroidClient == null) {
+            throw new MqttException(new Throwable("MqttAndroidClient is null"));
+        }
+        if (!isConnect()) {
+            throw new MqttException(new Throwable("MqttAndroidClient no connect!!!"));
+        }
         MqttMessage message = new MqttMessage();
         message.setId(imMessage.messageClientId);
-        if (!TextUtils.isEmpty(imMessage.payload)) message.setPayload(imMessage.payload.getBytes());
-        message.setQos(imMessage.qos);
         message.setRetained(imMessage.retained);
+        message.setQos(imMessage.qos);
+        if (!TextUtils.isEmpty(imMessage.payload)) message.setPayload(imMessage.payload.getBytes());
 
         mqttAndroidClient.publish(topic, message, userContext, new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken asyncActionToken) {
                 Logger.d("client ---> publish()  success...");
 
-                if (imClientListener != null) imClientListener.onPublishSuccess(asyncActionToken);
+                if (imMessageStatusListener != null) imMessageStatusListener.onSendingMessage();
             }
 
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                 Logger.e("client ---> publish()  failed  " + "<exception> " + (exception != null ? exception.toString() : null) + " <exception> IMqttToken : " + asyncActionToken);
 
-                if (imClientListener != null) imClientListener.onPublishFailure(asyncActionToken, exception);
+                if (imMessageStatusListener != null) imMessageStatusListener.onSendFailedMessage();
             }
         });
     }
@@ -314,16 +401,11 @@ public class IMConnectionClient {
             @Override
             public void onSuccess(IMqttToken asyncActionToken) {
                 Logger.d("client ---> subscribe()  success...");
-
-
-                if (imClientListener != null) imClientListener.onSubscribeSuccess(asyncActionToken);
             }
 
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                 Logger.e("client ---> subscribe()  failed  " + "<exception> " + (exception != null ? exception.toString() : null) + " <exception> IMqttToken : " + asyncActionToken);
-
-                if (imClientListener != null) imClientListener.onSubscribeFailure(asyncActionToken, exception);
             }
         }, new IMqttMessageListener() {
             @Override
@@ -335,7 +417,6 @@ public class IMConnectionClient {
 
                     if (message != null) {
                         received.payload = new String(message.getPayload());
-                        received.dup = message.isDuplicate();
                         received.retained = message.isRetained();
                         received.qos = message.getQos();
                         received.timeStamp = System.currentTimeMillis();
@@ -355,15 +436,11 @@ public class IMConnectionClient {
             @Override
             public void onSuccess(IMqttToken asyncActionToken) {
                 Logger.d("client ---> unsubscribe()  success...");
-
-                if (imClientListener != null) imClientListener.onUnSubscribeSuccess(asyncActionToken);
             }
 
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                 Logger.e("client ---> unsubscribe()  failed  " + "<exception> " + (exception != null ? exception.toString() : null) + " <exception> IMqttToken : " + asyncActionToken);
-
-                if (imClientListener != null) imClientListener.onUnSubscribeFailure(asyncActionToken, exception);
             }
         });
     }
@@ -380,8 +457,8 @@ public class IMConnectionClient {
         this.imReceivedMessageListener = receivedMessageListener;
     }
 
-    public void setIMCallback(IMCallback imCallback) {
-        this.imCallback = imCallback;
+    public void setIMCallback(IMMessageStatusListener imMessageStatusListener) {
+        this.imMessageStatusListener = imMessageStatusListener;
     }
 
     public void setIMTraceCallback(IMTraceCallback imTraceCallback) {
@@ -395,38 +472,43 @@ public class IMConnectionClient {
 
     private void setIMClientCallback() {
         if (mqttAndroidClient != null) {
-            mqttAndroidClient.setCallback(new MqttCallback() {
+            mqttAndroidClient.setCallback(new MqttCallbackExtended() {
                 @Override
                 public void connectionLost(Throwable cause) {
-                    Logger.e("setCallback ---> connectionLost() case : " + (cause != null ? cause.toString() : null));
+                    Logger.e("setIMClientCallback ---> connectionLost() case : " + (cause != null ? cause.toString() : null));
 
-                    if (imCallback != null) imCallback.connectionLost(cause);
+                    if (imMessageStatusListener != null) imMessageStatusListener.connectionLost(cause);
+                }
+
+                @Override
+                public void connectComplete(boolean reconnect, String serverURI) {
+                    Logger.e("setIMClientCallback -----> connectComplete()  reconnect = " + reconnect + "   serverURL : " + serverURI);
+                    if (imMessageStatusListener != null) imMessageStatusListener.connectComplete(reconnect, serverURI);
                 }
 
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    Logger.e("setCallback ---> messageArrived() topic : " + topic + "   message : "  + (message != null ? message.toString() : null));
+                    Logger.e("setIMClientCallback ---> messageArrived() topic : " + topic + "   message : "  + (message != null ? message.toString() : null));
 
-                    if (imCallback != null) {
+                    if (imMessageStatusListener != null) {
                         IMMessage received = new IMMessage();
 
                         if (message != null) {
                             received.payload = new String(message.getPayload());
-                            received.dup = message.isDuplicate();
                             received.retained = message.isRetained();
                             received.qos = message.getQos();
                             received.timeStamp = System.currentTimeMillis();
                         }
 
-                        imCallback.messageArrived(topic, received);
+                        imMessageStatusListener.onReceivedMessage(topic, received);
                     }
                 }
 
                 @Override
                 public void deliveryComplete(IMqttDeliveryToken token) {
-                    Logger.e("setCallback ---> deliveryComplete() token : " + (token != null ? token.toString() : null));
+                    Logger.e("setIMClientCallback ---> deliveryComplete() token : " + (token != null ? token.toString() : null));
 
-                    if (imCallback != null) imCallback.deliveryComplete(token);
+                    if (imMessageStatusListener != null) imMessageStatusListener.onSendCompletedMessage(token);
                 }
             });
         }
@@ -460,15 +542,6 @@ public class IMConnectionClient {
         }
     }
 
-    /**
-     * Changes the connection status of the client
-     *
-     * @param connectionStatus The connection status of this connection
-     */
-    public void changeConnectionStatus(ConnectionStatus connectionStatus) {
-        status = connectionStatus;
-    }
-
     public ConnectionStatus getConnectionStatus() {
         return status;
     }
@@ -477,12 +550,8 @@ public class IMConnectionClient {
         return mqttAndroidClient != null ? mqttAndroidClient.isConnected() : false;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
+    public String getServerURI() {
+        return this.mqttAndroidClient != null ? this.mqttAndroidClient.getServerURI() : "";
     }
 
     public String getClientId() {
@@ -551,8 +620,6 @@ public class IMConnectionClient {
     @Override
     public String toString() {
         return "IMConnectionClient{" +
-                ", host='" + host + '\'' +
-                ", port=" + port +
                 ", clientId='" + clientId + '\'' +
                 ", tlsConnection=" + tlsConnection +
                 '}';

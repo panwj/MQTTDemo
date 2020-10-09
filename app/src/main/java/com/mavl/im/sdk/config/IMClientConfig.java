@@ -4,8 +4,6 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 public class IMClientConfig {
 
-    public String host = "54.205.75.48";
-    public int port = 9883;
     public String clientId = "";
     public String userName = "";
     public String password = "";
@@ -17,8 +15,6 @@ public class IMClientConfig {
     public boolean automaticReconnect = true;
 
     private IMClientConfig(Builder builder) {
-        this.host = builder.host;
-        this.port = builder.port;
         this.clientId = builder.clientId;
         this.userName = builder.userName;
         this.password = builder.password;
@@ -31,8 +27,6 @@ public class IMClientConfig {
     }
 
     public static class Builder {
-        private String host = "54.205.75.48";
-        private int port = 9883;
         private String clientId = "";
         private String userName = "";
         private String password = "";
@@ -42,16 +36,6 @@ public class IMClientConfig {
         private boolean cleanSession = true;
         private boolean tlsConnection = true;
         private boolean automaticReconnect = true;
-
-        public Builder setHost(String host) {
-            this.host = host;
-            return this;
-        }
-
-        public Builder setPort(int port) {
-            this.port = port;
-            return this;
-        }
 
         public Builder setClientId(String clientId) {
             this.clientId = clientId;
@@ -106,8 +90,6 @@ public class IMClientConfig {
     @Override
     public String toString() {
         return "IMClientConfig{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
                 ", clientId='" + clientId + '\'' +
                 ", userName='" + userName + '\'' +
                 ", password='" + password + '\'' +

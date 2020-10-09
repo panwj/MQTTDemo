@@ -5,6 +5,14 @@ import com.mavl.im.sdk.entity.IMMessage;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 
 public interface IMCallback {
+
+    /**
+     * Called when the connection to the server is completed successfully.
+     * @param reconnect If true, the connection was the result of automatic reconnect.
+     * @param serverURI The server URI that the connection was made to.
+     */
+    public void connectComplete(boolean reconnect, String serverURI);
+
     /**
      * This method is called when the connection to the server is lost.
      *
