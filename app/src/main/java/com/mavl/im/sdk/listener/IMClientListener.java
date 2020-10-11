@@ -2,18 +2,28 @@ package com.mavl.im.sdk.listener;
 
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 
+/**
+ * 用户连接 IM service时的状态回调
+ * 状态：
+ * 正在连接
+ * 连接成功
+ * 连接失败
+ * 正在断开连接
+ * 断开连接成功
+ * 断开连接失败
+ */
 public interface IMClientListener {
 
     /**
-     * 开始连接
+     * 正在连接
      */
-    void onConnecting();
+    void onConnecting(ConnectionStatus status);
 
     /**
      * This method is invoked when an action has completed successfully.
      * @param asyncActionToken associated with the action that has completed
      */
-    void onConnectSuccess(IMqttToken asyncActionToken);
+    void onConnectSuccess(ConnectionStatus status, IMqttToken asyncActionToken);
     /**
      * This method is invoked when an action fails.
      * If a client is disconnected while an action is in progress
@@ -24,14 +34,25 @@ public interface IMClientListener {
      * @param asyncActionToken associated with the action that has failed
      * @param exception thrown by the action that has failed
      */
-    void onConnectFailure(IMqttToken asyncActionToken, Throwable exception);
+    void onConnectFailure(ConnectionStatus status, IMqttToken asyncActionToken, Throwable exception);
 
     /**
-     * 开始断开连接
+     * 正在断开连接
      */
-    void onDisConnecting();
+    void onDisConnecting(ConnectionStatus status);
 
-    void onDisConnectSuccess(IMqttToken asyncActionToken);
+    /**
+     * 断开连接成功回调该函数
+     * @param status
+     * @param asyncActionToken
+     */
+    void onDisConnectSuccess(ConnectionStatus status, IMqttToken asyncActionToken);
 
-    void onDisConnectFailure(IMqttToken asyncActionToken, Throwable exception);
+    /**
+     * 断开连接失败时回调该函数
+     * @param status
+     * @param asyncActionToken
+     * @param exception
+     */
+    void onDisConnectFailure(ConnectionStatus status, IMqttToken asyncActionToken, Throwable exception);
 }

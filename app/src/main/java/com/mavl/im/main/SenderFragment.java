@@ -21,32 +21,38 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mavl.im.BaseFragment;
 import com.mavl.im.IMManager;
 import com.mavl.im.R;
+import com.mavl.im.db.DaoUtil2;
+import com.mavl.im.event.ConnectEvent;
 import com.mavl.im.sdk.IMConnectionClient;
+import com.mavl.im.sdk.IMConstants;
 import com.mavl.im.sdk.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
-import com.mavl.im.sdk.listener.IMCallback;
-import com.mavl.im.sdk.listener.IMReceivedMessageListener;
+import com.mavl.im.sdk.listener.IMMessageStatusListener;
+import com.mavl.im.util.TimeUtil;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class SenderFragment extends BaseFragment {
 
     private RecyclerView recyclerView;
     private MessageAdapter adapter;
-    private EditText editText, publicText;
+    private EditText editText;
     private Button button;
+    private TextView clientStatusTv;
     private IMConnectionClient client;
     private List<IMMessage> mList;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        client = IMManager.getInstance(getActivity()).createDefaultAccount2();
+        registerEventBus();
+        client = IMManager.getInstance(getActivity()).getClient("client2");
+        if (client == null) client = IMManager.getInstance(getActivity()).createDefaultAccount2();
     }
 
     @Override
@@ -62,6 +68,22 @@ public class SenderFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterEventBus();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void ConnectEvent(ConnectEvent connectEvent) {
+        updateClientStatus();
+    }
+
+    private void registerEventBus() {
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
+    }
+
+    private void unregisterEventBus() {
+        if (EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
     }
 
     private void initView(View view) {
@@ -75,68 +97,138 @@ public class SenderFragment extends BaseFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         adapter = new MessageAdapter();
         recyclerView.setAdapter(adapter);
+        updateData();
 
-        publicText = view.findViewById(R.id.edit_public);
         editText = view.findViewById(R.id.edit);
+        clientStatusTv = view.findViewById(R.id.client_status_tv);
+        clientStatusTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Logger.d("onClick client status : " + (client != null ? client.isConnect() : null));
+                if (client == null) {
+                    client = IMManager.getInstance(getActivity()).getClient("client1");
+                    updateClientStatus();
+                    return;
+                }
+                if (client.isConnect()) {
+                    IMManager.getInstance(getActivity()).client2logout();
+                } else {
+                    try {
+                        client.doConnect(null);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Logger.e("client1 do connect exception : " + e.toString());
+
+                    }
+                }
+            }
+        });
+        updateClientStatus();
+
         button = view.findViewById(R.id.send);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Editable editable = editText.getText();
                 String text = editable.toString();
-                String topic = publicText.getText().toString();
 
-                if (TextUtils.isEmpty(text) || TextUtils.isEmpty(topic)) {
+                if (TextUtils.isEmpty(text)) {
                     Toast.makeText(getActivity(), "message not empty...", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                IMMessage message = new IMMessage();
-                message.messageClientId = 122;
-                message.qos = 0;
-                message.retained = true;
-                message.payload = text;
                 try {
-                    client.publish(topic, message, null);
+                    IMConnectionClient client1 = IMManager.getInstance(getActivity()).getClient("client1");
+                    if (client1 == null) {
+                        Toast.makeText(getActivity(), "对方用户不存在", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    client.publishOneToOne(client1.getClientId(), text, null);
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    updateData(message);
                 }
             }
         });
 
-        client.setIMCallback(new IMCallback() {
+        client.setIMCallback(new IMMessageStatusListener() {
+            @Override
+            public void connectComplete(boolean reconnect, String serverURI) {
+                updateClientStatus();
+            }
+
             @Override
             public void connectionLost(Throwable cause) {
-                Logger.e("client2 ---->  connectionLost() : " + (cause != null ? cause.toString() : null));
+                updateClientStatus();
             }
 
             @Override
-            public void messageArrived(String topic, IMMessage message) throws Exception {
-                Logger.d("client2 ---->  topic : " + topic + "    message : " + (message != null ? message.toString() : null));
+            public void onSendingMessage(IMMessage imMessage) {
+                IMMessage message = DaoUtil2.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
+//                Logger.d("onSendingMessage() message ---> " + message);
+                if (message == null) {
+                    DaoUtil2.saveMessage(getActivity(), imMessage);
+                } else {
+                    DaoUtil2.updateMessageStatus(getActivity(), imMessage);
+                }
+                updateData();
             }
 
             @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-                Logger.d("client2 ----> deliveryComplete() " + (token != null ? token.toString() : null));
+            public void onSendCompletedMessage(int msgClientId, String payload) {
+                IMMessage message = DaoUtil2.getIMMessageByClientId(getActivity(), msgClientId);
+//                Logger.d("onSendCompletedMessage() message ---> " + message);
+                if (message != null) {
+                    message.status = IMConstants.MSG_SEND_STATUS_COMPLETED;
+                    DaoUtil2.updateMessageStatus(getActivity(), message);
+                }
+                updateData();
+            }
+
+            @Override
+            public void onReceivedMessage(IMMessage imMessage) {
+                IMMessage message = DaoUtil2.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
+//                Logger.d("onReceivedMessage() message ---> " + message);
+                if (message == null) {
+                    DaoUtil2.saveMessage(getActivity(), imMessage);
+                } else {
+                    DaoUtil2.updateMessage(getActivity(), imMessage);
+                }
+                updateData();
+            }
+
+            @Override
+            public void onSendFailedMessage(IMMessage imMessage, Throwable exception) {
+                IMMessage message = DaoUtil2.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
+                if (message == null) {
+                    DaoUtil2.saveMessage(getActivity(), imMessage);
+                } else {
+                    DaoUtil2.updateMessageStatus(getActivity(), imMessage);
+                }
+                updateData();
             }
         });
-       /* client.setIMReceivedMessageListener(new IMReceivedMessageListener() {
-            @Override
-            public void onMessageReceived(IMMessage message) {
-                Logger.e("client2 ----> onMessageReceived() : " + message);
-            }
-        });*/
     }
 
     public String getClientName() {
         return client != null ? client.getClientId() : "Sender";
     }
 
-    private void updateData(IMMessage message) {
+    public void updateClientStatus() {
+        if (clientStatusTv == null) return;
+        if (client == null) {
+            clientStatusTv.setText("client2用户还未创建");
+        } else if (client.isConnect()) {
+            clientStatusTv.setText("client2用户已登陆");
+        } else {
+            clientStatusTv.setText("client2用户未登陆");
+        }
+    }
+
+    private void updateData() {
+        ArrayList messages = DaoUtil2.getMessageList(getActivity());
         if (mList == null) mList = new ArrayList<>();
-        mList.add(message);
+        mList.clear();
+        if (messages != null && messages.size() > 0) mList.addAll(messages);
         if (adapter != null) adapter.updateList(mList);
     }
 
@@ -183,8 +275,24 @@ public class SenderFragment extends BaseFragment {
             }
 
             public void bindView(IMMessage message) {
-
-                tvSend.setText(message.toString());
+                String fromUid = message.fromUid;
+                if (fromUid.contains(client.getClientId())) {
+                    tvSend.setText(fromUid + " : <status :  "
+                            + message.status
+                            + "  "
+                            + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss")
+                            + " >" + message.payload);
+                    tvSend.setVisibility(View.VISIBLE);
+                    tvReceived.setVisibility(View.GONE);
+                } else {
+                    tvReceived.setText(message.toUid + " : <status :  "
+                            + message.status
+                            + "  "
+                            + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss")
+                            + " >" + message.payload);
+                    tvReceived.setVisibility(View.VISIBLE);
+                    tvSend.setVisibility(View.GONE);
+                }
             }
         }
     }

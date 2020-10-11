@@ -1,5 +1,7 @@
 package com.mavl.im.sdk.config;
 
+import androidx.annotation.NonNull;
+
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 public class IMClientConfig {
@@ -15,9 +17,9 @@ public class IMClientConfig {
     public boolean automaticReconnect = true;
 
     private IMClientConfig(Builder builder) {
-        this.clientId = builder.clientId;
-        this.userName = builder.userName;
-        this.password = builder.password;
+        this.clientId = IMGlobalConfig.getAppId() + "_" + builder.clientId;
+        this.userName = IMGlobalConfig.getAppId() + "_" + builder.userName;
+        this.password = builder.password + "_" + IMGlobalConfig.getAppToken();
         this.timeout = builder.timeout;
         this.keepAlive = builder.keepAlive;
         this.mqttVersion = builder.mqttVersion;
@@ -42,12 +44,12 @@ public class IMClientConfig {
             return this;
         }
 
-        public Builder setName(String userName) {
+        public Builder setName(@NonNull String userName) {
             this.userName = userName;
             return this;
         }
 
-        public Builder setPassword(String password) {
+        public Builder setPassword(@NonNull String password) {
             this.password = password;
             return this;
         }
@@ -90,7 +92,7 @@ public class IMClientConfig {
     @Override
     public String toString() {
         return "IMClientConfig{" +
-                ", clientId='" + clientId + '\'' +
+                "  clientId='" + clientId + '\'' +
                 ", userName='" + userName + '\'' +
                 ", password='" + password + '\'' +
                 ", timeout=" + timeout +

@@ -12,18 +12,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="72dp" />
 
-    <EditText
-        android:id="@+id/edit_public"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
+    <TextView
+        android:id="@+id/client_status_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:background="@color/blue3"
         app:layout_constraintBottom_toBottomOf="@id/send"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         app:layout_constraintBottom_toTopOf="@id/edit"
-        android:layout_marginBottom="16dp"
-        android:hint="topic"
-        app:layout_constraintEnd_toStartOf="@id/send"/>
+        android:layout_marginBottom="16dp" />
 
     <EditText
         android:id="@+id/edit"

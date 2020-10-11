@@ -1,11 +1,38 @@
 package com.mavl.im.sdk.config;
 
 
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
+
+import com.mavl.im.sdk.entity.IMTopic;
 
 public class TopicConfig {
 
     private static final String SEPARATOR = "/";
+
+    public static IMTopic analysisTopic(String topic) {
+        if (TextUtils.isEmpty(topic)) return null;
+        String[] fields = topic.split(SEPARATOR);
+        if (fields == null || fields.length <= 0) return null;
+        int length = fields.length;
+        IMTopic imTopic = new IMTopic();
+        for (int i = 0; i < fields.length; i++) {
+        }
+        imTopic.appId = 0 < length ? fields[0] : "";
+        imTopic.operation = 1 < length ? Integer.parseInt(fields[1]) : IMOperationConfig.OPERATION_1;
+        imTopic.messageClientId = 2 < length ? Integer.valueOf(fields[2]) : 0;
+        imTopic.toUid = 3 < length ? fields[3] : "";
+        imTopic.messageId = 4 < length ? fields[4] : "";
+        imTopic.fromUid = 5 < length ? fields[5] : "";
+        if (!TextUtils.isEmpty(imTopic.messageId)) {
+            imTopic.timeStamp = Long.parseLong(imTopic.messageId);
+        } else {
+            imTopic.timeStamp = System.currentTimeMillis();
+        }
+
+        return imTopic;
+    }
 
     /**
      * 发送1v1消息

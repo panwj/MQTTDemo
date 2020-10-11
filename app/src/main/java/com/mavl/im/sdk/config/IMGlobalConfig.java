@@ -8,7 +8,7 @@ import org.eclipse.paho.android.service.MqttAndroidClient;
 
 public class IMGlobalConfig {
 
-    private static String APP_ID = "56";
+    private static String APP_ID = "54";
 
     private static String APP_TOKEN = "c90265a583aaea81";
 
@@ -22,10 +22,9 @@ public class IMGlobalConfig {
      **/
     private static int port = 9883;
 
-    public static boolean initializeSDK(Builder builder) {
-        if (builder == null) return false;
+    public static boolean initializeSDK(IMGlobalConfig config) {
+        if (config == null) return false;
         if (TextUtils.isEmpty(getAppId()) || TextUtils.isEmpty(getAppToken())) return false;
-        Logger.e("initializeSDK()  builder : " + builder.toString());
         return true;
     }
 
@@ -45,35 +44,36 @@ public class IMGlobalConfig {
         return APP_TOKEN;
     }
 
-    private IMGlobalConfig(Builder builder) {
+    private IMGlobalConfig(IMGlobalConfigBuilder builder) {
+        Logger.e("IMGlobalConfig()  builder : " + builder.toString());
         host = builder.host;
         port = builder.port;
         APP_ID = builder.appId;
         APP_TOKEN = builder.appToken;
     }
 
-    public static class Builder {
+    public static class IMGlobalConfigBuilder {
         private String host = "54.205.75.48";
         private int port = 9883;
         private String appId = "";
-        private String appToken = "";
+        private String appToken = "c90265a583aaea81";
 
-        public Builder setHost(String host) {
+        public IMGlobalConfigBuilder setHost(String host) {
             this.host = host;
             return this;
         }
 
-        public Builder setPort(int port) {
+        public IMGlobalConfigBuilder setPort(int port) {
             this.port = port;
             return this;
         }
 
-        public Builder setAppId(String appId) {
+        public IMGlobalConfigBuilder setAppId(String appId) {
             this.appId = appId;
             return this;
         }
 
-        public Builder setAppToken(String appToken) {
+        public IMGlobalConfigBuilder setAppToken(String appToken) {
             this.appToken = appToken;
             return this;
         }

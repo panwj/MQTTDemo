@@ -103,8 +103,14 @@ public class MainFragment extends BaseFragment implements View.OnClickListener {
                 updatePageTitle(position);
                 switch (position) {
                     case 0:
+                        if (mReceiverFragment != null) {
+                            mReceiverFragment.updateClientStatus();
+                        }
                         break;
                     case 1:
+                        if (mSenderFragment != null) {
+                            mSenderFragment.updateClientStatus();
+                        }
                         break;
                     case 2:
                         if (mClientsFragment != null) mClientsFragment.updateData();

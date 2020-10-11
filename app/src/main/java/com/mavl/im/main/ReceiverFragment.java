@@ -1,7 +1,5 @@
 package com.mavl.im.main;
 
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,9 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,14 +21,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mavl.im.BaseFragment;
 import com.mavl.im.IMManager;
 import com.mavl.im.R;
+import com.mavl.im.db.DaoUtil;
+import com.mavl.im.event.ConnectEvent;
 import com.mavl.im.sdk.IMConnectionClient;
+import com.mavl.im.sdk.IMConstants;
 import com.mavl.im.sdk.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
-import com.mavl.im.sdk.listener.IMCallback;
-import com.mavl.im.sdk.listener.IMReceivedMessageListener;
+import com.mavl.im.sdk.listener.IMMessageStatusListener;
+import com.mavl.im.util.TimeUtil;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +40,9 @@ import java.util.List;
 public class ReceiverFragment extends BaseFragment {
 
     private RecyclerView recyclerView;
-    private EditText editText, publicText;
+    private EditText editText;
     private Button button;
+    private TextView clientStatusTv;
     private IMConnectionClient client;
     private MessageAdapter adapter;
     private List<IMMessage> mList;
@@ -49,7 +50,9 @@ public class ReceiverFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        client = IMManager.getInstance(getActivity()).createDefaultAccount1();
+        registerEventBus();
+        client = IMManager.getInstance(getActivity()).getClient("client1");
+        if (client == null) client = IMManager.getInstance(getActivity()).createDefaultAccount1();
     }
 
     @Override
@@ -65,6 +68,22 @@ public class ReceiverFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterEventBus();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void ConnectEvent(ConnectEvent connectEvent) {
+        updateClientStatus();
+    }
+
+    private void registerEventBus() {
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
+    }
+
+    private void unregisterEventBus() {
+        if (EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
     }
 
     private void initView(View view) {
@@ -82,59 +101,118 @@ public class ReceiverFragment extends BaseFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         adapter = new MessageAdapter();
         recyclerView.setAdapter(adapter);
+        updateData();
 
-        publicText = view.findViewById(R.id.edit_public);
         editText = view.findViewById(R.id.edit);
+        clientStatusTv = view.findViewById(R.id.client_status_tv);
+        clientStatusTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Logger.d("onClick client status : " + (client != null ? client.isConnect() : null));
+                if (client == null) {
+                    client = IMManager.getInstance(getActivity()).getClient("client1");
+                    updateClientStatus();
+                    return;
+                }
+                if (client.isConnect()) {
+                    IMManager.getInstance(getActivity()).client1logout();
+                } else {
+                    try {
+                        client.doConnect(null);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Logger.e("client1 do connect exception : " + e.toString());
+
+                    }
+                }
+            }
+        });
+        updateClientStatus();
         button = view.findViewById(R.id.send);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Editable editable = editText.getText();
                 String text = editable.toString();
-                String topic = publicText.getText().toString();
 
-                if (TextUtils.isEmpty(text) || TextUtils.isEmpty(topic)) {
+                if (TextUtils.isEmpty(text)) {
                     Toast.makeText(getActivity(), "message not empty...", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 IMMessage message = new IMMessage();
-                message.messageClientId = 122;
-                message.qos = 0;
                 message.retained = true;
                 message.payload = text;
+                message.timeStamp = System.currentTimeMillis();
                 try {
-                    client.publish(topic, message, null);
+                    IMConnectionClient client2 = IMManager.getInstance(getActivity()).getClient("client2");
+                    if (client2 == null) {
+                        Toast.makeText(getActivity(), "对方用户不存在", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    client.publishOneToOne(client2.getClientId(), message, null);
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    updateData(message);
                 }
             }
         });
 
-        client.setIMCallback(new IMCallback() {
+        client.setIMCallback(new IMMessageStatusListener() {
+            @Override
+            public void connectComplete(boolean reconnect, String serverURI) {
+                updateClientStatus();
+            }
+
             @Override
             public void connectionLost(Throwable cause) {
-                Logger.e("client1 ---->  connectionLost() : " + (cause != null ? cause.toString() : null));
+                updateClientStatus();
             }
 
             @Override
-            public void messageArrived(String topic, IMMessage message) throws Exception {
-                Logger.d("client1 ---->  topic : " + topic + "    message : " + (message != null ? message.toString() : null));
-
-                mList.add(message);
+            public void onSendingMessage(IMMessage imMessage) {
+                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
+//                Logger.d("onSendingMessage() message ---> " + message);
+                if (message == null) {
+                    DaoUtil.saveMessage(getActivity(), imMessage);
+                } else {
+                    DaoUtil.updateMessageStatus(getActivity(), imMessage);
+                }
+                updateData();
             }
 
             @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-                Logger.d("client1 ----> deliveryComplete() " + (token != null ? token.toString() : null));
+            public void onSendCompletedMessage(int msgClientId, String payload) {
+                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), msgClientId);
+//                Logger.d("onSendCompletedMessage() message ---> " + message);
+                if (message != null) {
+                    message.status = IMConstants.MSG_SEND_STATUS_COMPLETED;
+                    DaoUtil.updateMessageStatus(getActivity(), message);
+                }
             }
-        });
-        client.setIMReceivedMessageListener(new IMReceivedMessageListener() {
+
             @Override
-            public void onMessageReceived(IMMessage message) {
-                Logger.e("client1 ----> onMessageReceived() : " + message);
+            public void onReceivedMessage(IMMessage imMessage) {
+//                Logger.d("received last msg ---> " + imMessage);
+
+                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
+//                Logger.d("onReceivedMessage() message ---> " + message);
+                if (message == null) {
+                    DaoUtil.saveMessage(getActivity(), imMessage);
+                } else {
+                    DaoUtil.updateMessage(getActivity(), imMessage);
+                }
+                updateData();
+            }
+
+            @Override
+            public void onSendFailedMessage(IMMessage imMessage, Throwable exception) {
+                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
+                if (message == null) {
+                    DaoUtil.saveMessage(getActivity(), imMessage);
+                } else {
+                    DaoUtil.updateMessageStatus(getActivity(), imMessage);
+                }
+                updateData();
             }
         });
     }
@@ -143,9 +221,22 @@ public class ReceiverFragment extends BaseFragment {
         return client != null ? client.getClientId() : "Receiver";
     }
 
-    private void updateData(IMMessage message) {
+    public void updateClientStatus() {
+        if (clientStatusTv == null) return;
+        if (client == null) {
+            clientStatusTv.setText("client1用户还未创建");
+        } else if (client.isConnect()) {
+            clientStatusTv.setText("client1用户已登陆");
+        } else {
+            clientStatusTv.setText("client1用户未登陆");
+        }
+    }
+
+    private void updateData() {
+        ArrayList messages = DaoUtil.getMessageList(getActivity());
         if (mList == null) mList = new ArrayList<>();
-        mList.add(message);
+        mList.clear();
+        if (messages != null && messages.size() > 0) mList.addAll(messages);
         if (adapter != null) adapter.updateList(mList);
     }
 
@@ -191,8 +282,24 @@ public class ReceiverFragment extends BaseFragment {
             }
 
             public void bindView(IMMessage message) {
-
-                tvReceived.setText(message.toString());
+                String fromUid = message.fromUid;
+                if (fromUid.contains(client.getClientId())) {
+                    tvSend.setText(fromUid + " : <status :  "
+                            + message.status
+                            + "  "
+                            + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss")
+                            + " >" + message.payload);
+                    tvSend.setVisibility(View.VISIBLE);
+                    tvReceived.setVisibility(View.GONE);
+                } else {
+                    tvReceived.setText(message.toUid + " : <status :  "
+                            + message.status
+                            + "  "
+                            + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss")
+                            + " >" + message.payload);
+                    tvReceived.setVisibility(View.VISIBLE);
+                    tvSend.setVisibility(View.GONE);
+                }
             }
         }
     }
