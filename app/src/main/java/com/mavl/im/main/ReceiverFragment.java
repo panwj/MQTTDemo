@@ -29,6 +29,7 @@ import com.mavl.im.sdk.IMConstants;
 import com.mavl.im.sdk.util.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
 import com.mavl.im.sdk.listener.IMMessageStatusListener;
+import com.mavl.im.util.SharedPreferencesUtil;
 import com.mavl.im.util.TimeUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -142,8 +143,9 @@ public class ReceiverFragment extends BaseFragment {
                 }
 
                 IMMessage message = new IMMessage();
-                message.retained = true;
+                message.retained = (boolean) SharedPreferencesUtil.get(getActivity(), SharedPreferencesUtil.PREF_CLIENT1_RETAINED, true);
                 message.payload = text;
+                message.qos = (int) SharedPreferencesUtil.get(getActivity(), SharedPreferencesUtil.PREF_CLIENT1_QOS, 1);
                 message.timeStamp = System.currentTimeMillis();
                 try {
                     IMMessageClient client2 = IMManager.getInstance(getActivity()).getClient("client2");

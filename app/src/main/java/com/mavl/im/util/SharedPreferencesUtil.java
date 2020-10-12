@@ -11,6 +11,16 @@ import java.util.Map;
  */
 public class SharedPreferencesUtil {
 
+    public static final String PREF_CLIENT1_RETAINED = "pref_bool_client1_retained";
+    public static final String PREF_CLIENT1_CLEAN_SESSION = "pref_bool_client1_clean_session";
+    public static final String PREF_CLIENT1_AUTO_RECONNECT = "pref_bool_client1_auto_reconnect";
+    public static final String PREF_CLIENT1_QOS = "pref_int_client1_qos";
+
+    public static final String PREF_CLIENT2_RETAINED = "pref_bool_client2_retained";
+    public static final String PREF_CLIENT2_CLEAN_SESSION = "pref_bool_client2_clean_session";
+    public static final String PREF_CLIENT2_AUTO_RECONNECT = "pref_bool_client2_auto_reconnect";
+    public static final String PREF_CLIENT2_QOS = "pref_int_client2_qos";
+
     private SharedPreferencesUtil() {
         /** cannot be instantiated**/
         throw new UnsupportedOperationException("cannot be instantiated");

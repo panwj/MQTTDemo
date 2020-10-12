@@ -29,6 +29,7 @@ import com.mavl.im.sdk.IMConstants;
 import com.mavl.im.sdk.util.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
 import com.mavl.im.sdk.listener.IMMessageStatusListener;
+import com.mavl.im.util.SharedPreferencesUtil;
 import com.mavl.im.util.TimeUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -144,7 +145,14 @@ public class SenderFragment extends BaseFragment {
                         Toast.makeText(getActivity(), "对方用户不存在", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    client.publishOneToOne(client1.getClientId(), text, null);
+
+                    IMMessage message = new IMMessage();
+                    message.retained = (boolean) SharedPreferencesUtil.get(getActivity(), SharedPreferencesUtil.PREF_CLIENT2_RETAINED, true);
+                    message.payload = text;
+                    message.qos = (int) SharedPreferencesUtil.get(getActivity(), SharedPreferencesUtil.PREF_CLIENT2_QOS, 1);
+                    message.timeStamp = System.currentTimeMillis();
+
+                    client.publishOneToOne(client1.getClientId(), message, null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

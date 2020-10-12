@@ -9,6 +9,7 @@ import com.mavl.im.sdk.config.IMClientConfig;
 import com.mavl.im.sdk.config.IMGlobalConfig;
 import com.mavl.im.sdk.listener.ConnectionStatus;
 import com.mavl.im.sdk.listener.IMClientListener;
+import com.mavl.im.util.SharedPreferencesUtil;
 
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.greenrobot.eventbus.EventBus;
@@ -45,7 +46,8 @@ public class IMManager {
                 .setTimeout(30)
                 .setKeepAlive(60)
                 .setTlsConnection(true)
-                .setCleanSession(true)
+                .setCleanSession((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT1_CLEAN_SESSION, true))
+                .setAutomaticReconnect((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT1_AUTO_RECONNECT, true))
                 .build();
         IMMessageClient client1 = IMMessageClient.createConnectClient(mContext, config1);
         client1.setIMClientListener(new IMClientListener() {
@@ -92,7 +94,8 @@ public class IMManager {
                 .setTimeout(30)
                 .setKeepAlive(60)
                 .setTlsConnection(true)
-                .setCleanSession(true)
+                .setCleanSession((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT2_CLEAN_SESSION, true))
+                .setAutomaticReconnect((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT2_AUTO_RECONNECT, true))
                 .build();
         IMMessageClient client2 = IMMessageClient.createConnectClient(mContext, config2);
         client2.setIMClientListener(new IMClientListener() {
@@ -161,12 +164,6 @@ public class IMManager {
                 postConnectEvent(ConnectionStatus.ERROR, new Throwable(e));
             }
         }
-
-        if (client1 != null) {
-            client1.setIMClientListener(null);
-            client1.setIMCallback(null);
-            client1.setIMReceivedMessageListener(null);
-        }
     }
 
     public void client2logout() {
@@ -179,12 +176,6 @@ public class IMManager {
                 Logger.e("client2 disConnect exception : " + e.toString());
                 postConnectEvent(ConnectionStatus.ERROR, new Throwable(e));
             }
-        }
-
-        if (client2 != null) {
-            client2.setIMClientListener(null);
-            client2.setIMCallback(null);
-            client2.setIMReceivedMessageListener(null);
         }
     }
 

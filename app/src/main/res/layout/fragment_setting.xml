@@ -1,6 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tv_client1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="client1 message config"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <CheckBox
+            android:id="@+id/client1_retained"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="retained"
+            app:layout_constraintStart_toStartOf="@id/tv_client1"
+            app:layout_constraintTop_toBottomOf="@id/tv_client1" />
+
+        <RadioGroup
+            android:id="@+id/client1_rg_qos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/client1_retained"
+            app:layout_constraintTop_toBottomOf="@id/client1_retained">
+
+            <RadioButton
+                android:id="@+id/client1_0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="qos 0 : 消息最多分发一次" />
+
+            <RadioButton
+                android:id="@+id/client1_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="qos 1 : 消息最少分发一次" />
+
+            <RadioButton
+                android:id="@+id/client1_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="qos 2 : 消息只分发一次" />
+
+        </RadioGroup>
+
+        <CheckBox
+            android:id="@+id/client1_cleanSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="clean Session"
+            android:textColor="@color/blue2"
+            app:layout_constraintStart_toStartOf="@id/client1_rg_qos"
+            app:layout_constraintTop_toBottomOf="@id/client1_rg_qos" />
+
+        <CheckBox
+            android:id="@+id/client1_automaticReconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="automatic Reconnect"
+            android:textColor="@color/blue2"
+            app:layout_constraintStart_toStartOf="@id/client1_cleanSession"
+            app:layout_constraintTop_toBottomOf="@id/client1_cleanSession" />
+
+        <View
+            android:id="@+id/divide"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/red"
+            app:layout_constraintStart_toStartOf="@id/client1_automaticReconnect"
+            app:layout_constraintTop_toBottomOf="@id/client1_automaticReconnect" />
+
+        <TextView
+            android:id="@+id/tv_client2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="client2 message config"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divide" />
+
+        <CheckBox
+            android:id="@+id/client2_retained"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="retained"
+            app:layout_constraintStart_toStartOf="@id/tv_client2"
+            app:layout_constraintTop_toBottomOf="@id/tv_client2" />
+
+        <RadioGroup
+            android:id="@+id/client2_rg_qos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/client2_retained"
+            app:layout_constraintTop_toBottomOf="@id/client2_retained">
+
+            <RadioButton
+                android:id="@+id/client2_0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="qos 0 : 消息最多分发一次" />
+
+            <RadioButton
+                android:id="@+id/client2_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="qos 1 : 消息最少分发一次" />
+
+            <RadioButton
+                android:id="@+id/client2_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="qos 2 : 消息只分发一次" />
+
+        </RadioGroup>
+
+        <CheckBox
+            android:id="@+id/client2_cleanSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="clean Session"
+            android:textColor="@color/blue2"
+            app:layout_constraintStart_toStartOf="@id/client2_rg_qos"
+            app:layout_constraintTop_toBottomOf="@id/client2_rg_qos" />
+
+        <CheckBox
+            android:id="@+id/client2_automaticReconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="automatic Reconnect"
+            android:textColor="@color/blue2"
+            app:layout_constraintStart_toStartOf="@id/client2_cleanSession"
+            app:layout_constraintTop_toBottomOf="@id/client2_cleanSession" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
