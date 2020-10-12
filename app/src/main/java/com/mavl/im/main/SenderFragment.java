@@ -25,7 +25,7 @@ import com.mavl.im.db.DaoUtil2;
 import com.mavl.im.event.ConnectEvent;
 import com.mavl.im.sdk.IMMessageClient;
 import com.mavl.im.sdk.IMConstants;
-import com.mavl.im.sdk.Logger;
+import com.mavl.im.sdk.util.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
 import com.mavl.im.sdk.listener.IMMessageStatusListener;
 import com.mavl.im.util.TimeUtil;

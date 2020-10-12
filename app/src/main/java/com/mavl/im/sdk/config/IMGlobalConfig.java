@@ -2,7 +2,7 @@ package com.mavl.im.sdk.config;
 
 import android.text.TextUtils;
 
-import com.mavl.im.sdk.Logger;
+import com.mavl.im.sdk.util.Logger;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 

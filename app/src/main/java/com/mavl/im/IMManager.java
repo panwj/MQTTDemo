@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.mavl.im.event.ConnectEvent;
 import com.mavl.im.sdk.IMMessageClient;
-import com.mavl.im.sdk.Logger;
+import com.mavl.im.sdk.util.Logger;
 import com.mavl.im.sdk.config.IMClientConfig;
 import com.mavl.im.sdk.config.IMGlobalConfig;
 import com.mavl.im.sdk.listener.ConnectionStatus;

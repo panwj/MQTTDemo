@@ -16,6 +16,7 @@ import com.mavl.im.sdk.listener.IMClientListener;
 import com.mavl.im.sdk.listener.IMMessageStatusListener;
 import com.mavl.im.sdk.listener.IMReceivedMessageListener;
 import com.mavl.im.sdk.listener.IMTraceCallback;
+import com.mavl.im.sdk.util.Logger;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.android.service.MqttTraceHandler;
@@ -38,8 +39,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
 public class IMMessageClient {
-
-    private static final int DEFAULT_CONNECT_TIMEOUT_TIMES = 30;
 
     private Context mContext;
 
@@ -618,8 +617,8 @@ public class IMMessageClient {
         MqttConnectOptions connOpts = new MqttConnectOptions();
         if (config == null) {
             connOpts.setAutomaticReconnect(true);
-            connOpts.setConnectionTimeout(DEFAULT_CONNECT_TIMEOUT_TIMES);
-            connOpts.setKeepAliveInterval(DEFAULT_CONNECT_TIMEOUT_TIMES * 2);
+            connOpts.setConnectionTimeout(IMConstants.DEFAULT_CONNECT_TIMEOUT_TIMES);
+            connOpts.setKeepAliveInterval(IMConstants.DEFAULT_CONNECT_TIMEOUT_TIMES * 2);
         } else {
             connOpts.setAutomaticReconnect(config.automaticReconnect);
             connOpts.setCleanSession(config.cleanSession);

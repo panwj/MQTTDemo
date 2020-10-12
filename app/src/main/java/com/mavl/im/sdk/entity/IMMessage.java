@@ -11,6 +11,12 @@ public class IMMessage implements Parcelable {
     public int messageClientId = hashCode();//消息的本地ID，用于与后台返回的消息体对应
     public String payload;//消息内容
     public int qos = 1;//operation, 0: 消息最多分发一次； 1：消息最少分发一次； 2：消息只分发一次
+    /**
+     * 保留消息Retained Messages, 即为遗言消息。
+     * broker收到该消息后会保存此消息，当有新的订阅者订阅此主题时候，broker会立即发送此消息。
+     * 有点类似于会话清除，不同的是遗言只有一条，后面的遗言消息会覆盖前面的。如果需要删除retain消息，
+     * 可以发布一个空的retain消息，因为每个新的retain消息都会覆盖最后一个retain消息
+     */
     public boolean retained = true;
     public boolean dup = false;
     public long timeStamp;//生成消息的时间戳，毫秒

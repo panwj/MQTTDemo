@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.mavl.im.sdk.Logger;
+import com.mavl.im.sdk.util.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
 
 import java.util.ArrayList;

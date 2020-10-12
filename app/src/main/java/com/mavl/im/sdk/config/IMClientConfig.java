@@ -12,6 +12,9 @@ public class IMClientConfig {
     public int timeout = 30;
     public int keepAlive = 60;
     public int mqttVersion = MqttConnectOptions.MQTT_VERSION_3_1_1;
+    /**
+     * 会话清除标识session, 标识 Client 是否建立一个持久化的会话
+     */
     public boolean cleanSession = true;
     public boolean tlsConnection = true;
     public boolean automaticReconnect = true;

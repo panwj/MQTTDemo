@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.mavl.im.event.ConnectEvent;
 import com.mavl.im.sdk.IMMessageClient;
-import com.mavl.im.sdk.Logger;
+import com.mavl.im.sdk.util.Logger;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
