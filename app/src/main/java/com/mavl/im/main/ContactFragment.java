@@ -1,16 +1,12 @@
 package com.mavl.im.main;
 
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,14 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mavl.im.BaseFragment;
 import com.mavl.im.IMManager;
 import com.mavl.im.R;
-import com.mavl.im.sdk.IMConnectionClient;
-import com.mavl.im.sdk.Logger;
-import com.mavl.im.sdk.config.IMClientConfig;
-import com.mavl.im.sdk.entity.IMSubscribe;
-import com.mavl.im.sdk.listener.ConnectionStatus;
-import com.mavl.im.sdk.listener.IMClientListener;
-
-import org.eclipse.paho.client.mqttv3.IMqttToken;
+import com.mavl.im.sdk.IMMessageClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,9 +64,9 @@ public class ContactFragment extends BaseFragment {
     }
 
     public void updateData() {
-        Map<String, IMConnectionClient> maps = IMManager.getInstance(getActivity()).getClients();
-        List<IMConnectionClient> list = new ArrayList<>();
-        for (IMConnectionClient client : maps.values()) {
+        Map<String, IMMessageClient> maps = IMManager.getInstance(getActivity()).getClients();
+        List<IMMessageClient> list = new ArrayList<>();
+        for (IMMessageClient client : maps.values()) {
             list.add(client);
         }
         if (adapter != null) adapter.updateList(list);
@@ -85,12 +74,12 @@ public class ContactFragment extends BaseFragment {
 
     private class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ViewHolder> {
 
-        private List<IMConnectionClient> mList;
+        private List<IMMessageClient> mList;
 
         /**
          * 刷新列表数据。
          */
-        public void updateList(List<IMConnectionClient> list) {
+        public void updateList(List<IMMessageClient> list) {
             if (mList == null) mList = new ArrayList<>();
             mList.clear();
             if (list != null) mList.addAll(list);
@@ -128,7 +117,7 @@ public class ContactFragment extends BaseFragment {
                 editText = itemView.findViewById(R.id.edit);
             }
 
-            public void bindView(final IMConnectionClient client) {
+            public void bindView(final IMMessageClient client) {
 
             }
         }

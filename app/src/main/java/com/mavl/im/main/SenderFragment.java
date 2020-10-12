@@ -23,7 +23,7 @@ import com.mavl.im.IMManager;
 import com.mavl.im.R;
 import com.mavl.im.db.DaoUtil2;
 import com.mavl.im.event.ConnectEvent;
-import com.mavl.im.sdk.IMConnectionClient;
+import com.mavl.im.sdk.IMMessageClient;
 import com.mavl.im.sdk.IMConstants;
 import com.mavl.im.sdk.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
@@ -44,7 +44,7 @@ public class SenderFragment extends BaseFragment {
     private EditText editText;
     private Button button;
     private TextView clientStatusTv;
-    private IMConnectionClient client;
+    private IMMessageClient client;
     private List<IMMessage> mList;
 
     @Override
@@ -138,7 +138,7 @@ public class SenderFragment extends BaseFragment {
                 }
 
                 try {
-                    IMConnectionClient client1 = IMManager.getInstance(getActivity()).getClient("client1");
+                    IMMessageClient client1 = IMManager.getInstance(getActivity()).getClient("client1");
                     if (client1 == null) {
                         Toast.makeText(getActivity(), "对方用户不存在", Toast.LENGTH_SHORT).show();
                         return;

@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.mavl.im.event.ConnectEvent;
-import com.mavl.im.sdk.IMConnectionClient;
+import com.mavl.im.sdk.IMMessageClient;
 import com.mavl.im.sdk.Logger;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -30,7 +30,7 @@ public class SignInActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    IMConnectionClient client = IMManager.getInstance(getApplicationContext()).createDefaultAccount1();
+                    IMMessageClient client = IMManager.getInstance(getApplicationContext()).createDefaultAccount1();
                     client.doConnect(null);
                 } catch (Exception e) {
                     e.printStackTrace();

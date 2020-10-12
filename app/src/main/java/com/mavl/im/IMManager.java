@@ -3,7 +3,7 @@ package com.mavl.im;
 import android.content.Context;
 
 import com.mavl.im.event.ConnectEvent;
-import com.mavl.im.sdk.IMConnectionClient;
+import com.mavl.im.sdk.IMMessageClient;
 import com.mavl.im.sdk.Logger;
 import com.mavl.im.sdk.config.IMClientConfig;
 import com.mavl.im.sdk.config.IMGlobalConfig;
@@ -20,7 +20,7 @@ public class IMManager {
 
     private Context mContext;
     private static volatile IMManager mInstance;
-    private Map<String, IMConnectionClient> mClients = new HashMap<>();
+    private Map<String, IMMessageClient> mClients = new HashMap<>();
 
     public static IMManager getInstance(Context context) {
         if (mInstance == null) {
@@ -37,7 +37,7 @@ public class IMManager {
         mContext = context.getApplicationContext();
     }
 
-    public IMConnectionClient createDefaultAccount1() {
+    public IMMessageClient createDefaultAccount1() {
         IMClientConfig config1 = new IMClientConfig.Builder()
                 .setClientId("client1")
                 .setName("client1")
@@ -47,7 +47,7 @@ public class IMManager {
                 .setTlsConnection(true)
                 .setCleanSession(true)
                 .build();
-        IMConnectionClient client1 = IMConnectionClient.createConnectClient(mContext, config1);
+        IMMessageClient client1 = IMMessageClient.createConnectClient(mContext, config1);
         client1.setIMClientListener(new IMClientListener() {
             @Override
             public void onConnecting(ConnectionStatus status) {
@@ -84,7 +84,7 @@ public class IMManager {
         return client1;
     }
 
-    public IMConnectionClient createDefaultAccount2() {
+    public IMMessageClient createDefaultAccount2() {
         IMClientConfig config2 = new IMClientConfig.Builder()
                 .setClientId("client2")
                 .setName("client2")
@@ -94,7 +94,7 @@ public class IMManager {
                 .setTlsConnection(true)
                 .setCleanSession(true)
                 .build();
-        IMConnectionClient client2 = IMConnectionClient.createConnectClient(mContext, config2);
+        IMMessageClient client2 = IMMessageClient.createConnectClient(mContext, config2);
         client2.setIMClientListener(new IMClientListener() {
             @Override
             public void onConnecting(ConnectionStatus status) {
@@ -131,7 +131,7 @@ public class IMManager {
         return client2;
     }
 
-    public void addClient(IMConnectionClient client) {
+    public void addClient(IMMessageClient client) {
         if (client == null) return;
         if (!mClients.containsKey(client.getClientId())) {
             mClients.put(client.getClientId(), client);
@@ -141,17 +141,17 @@ public class IMManager {
         }
     }
 
-    public Map<String, IMConnectionClient> getClients() {
+    public Map<String, IMMessageClient> getClients() {
         return mClients;
     }
 
-    public IMConnectionClient getClient(String clientId) {
+    public IMMessageClient getClient(String clientId) {
         clientId = IMGlobalConfig.getAppId() + "_" + clientId;
         return mClients.get(clientId);
     }
 
     public void client1logout() {
-        IMConnectionClient client1 = getClient("client1");
+        IMMessageClient client1 = getClient("client1");
         if (client1 != null && client1.isConnect()) {
             try {
                 client1.disConnect(3, null);
@@ -170,7 +170,7 @@ public class IMManager {
     }
 
     public void client2logout() {
-        IMConnectionClient client2 = getClient("client2");
+        IMMessageClient client2 = getClient("client2");
         if (client2 != null && client2.isConnect()) {
             try {
                 client2.disConnect(3, null);

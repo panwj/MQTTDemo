@@ -12,7 +12,6 @@ import com.mavl.im.sdk.entity.IMMessage;
 import com.mavl.im.sdk.entity.IMSubscribe;
 import com.mavl.im.sdk.entity.IMTopic;
 import com.mavl.im.sdk.listener.ConnectionStatus;
-import com.mavl.im.sdk.listener.IMCallback;
 import com.mavl.im.sdk.listener.IMClientListener;
 import com.mavl.im.sdk.listener.IMMessageStatusListener;
 import com.mavl.im.sdk.listener.IMReceivedMessageListener;
@@ -38,7 +37,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-public class IMConnectionClient {
+public class IMMessageClient {
 
     private static final int DEFAULT_CONNECT_TIMEOUT_TIMES = 30;
 
@@ -80,7 +79,7 @@ public class IMConnectionClient {
     private IMTraceCallback imTraceCallback;
 
 
-    private IMConnectionClient(Context context, MqttAndroidClient client, @NonNull IMClientConfig config) {
+    private IMMessageClient(Context context, MqttAndroidClient client, @NonNull IMClientConfig config) {
         this.mContext = context;
         this.clientId = config.clientId;
         this.tlsConnection = config.tlsConnection;
@@ -94,7 +93,7 @@ public class IMConnectionClient {
         Logger.e("==>==>==>==>==>==>==>==>  IMConnectionClient(END)  <====<==<==<==<==<==<==<==");
     }
 
-    public static IMConnectionClient createConnectClient(Context context, @NonNull IMClientConfig config) {
+    public static IMMessageClient createConnectClient(Context context, @NonNull IMClientConfig config) {
         String uri;
         if (config.tlsConnection) {
             uri = "ssl://" + IMGlobalConfig.getHost() + ":" + IMGlobalConfig.getPort();
@@ -103,7 +102,7 @@ public class IMConnectionClient {
         }
         MqttAndroidClient client = new MqttAndroidClient(context, uri, config.clientId);
 
-        return new IMConnectionClient(context, client, config);
+        return new IMMessageClient(context, client, config);
     }
 
     /**

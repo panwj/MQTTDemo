@@ -16,7 +16,7 @@ public class IMMessage implements Parcelable {
     public long timeStamp;//生成消息的时间戳，毫秒
 
     public int status = IMConstants.MSG_SEND_STATUS_SENDING;//message status,  0：消息发送中； 1：消息发送成功； 2：消息发送失败
-    public boolean isReceived = true;//true:是收到的消息； false:是发送到的消息
+    public boolean isReceived = true;//true:收到的消息； false:发送的消息
     public String fromUid = "";
     public String toUid = "";
 
