@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -266,32 +267,59 @@ public class SenderFragment extends BaseFragment {
 
         private class ViewHolder extends RecyclerView.ViewHolder {
 
-            private TextView tvReceived, tvSend;
+            private TextView tvReceivedName, tvReceivedMsg;
+            private TextView tvSendName, tvSendMsg;
+            private ImageView ivReceivedStatus, ivSendStatus;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                tvReceived = itemView.findViewById(R.id.tv_receiver);
-                tvSend = itemView.findViewById(R.id.tv_send);
+                tvReceivedName = itemView.findViewById(R.id.tv_receiver_name);
+                tvReceivedMsg = itemView.findViewById(R.id.tv_receiver_msg);
+                ivReceivedStatus = itemView.findViewById(R.id.iv_receiver_status);
+
+                tvSendName = itemView.findViewById(R.id.tv_send);
+                tvSendMsg = itemView.findViewById(R.id.tv_send_msg);
+                ivSendStatus = itemView.findViewById(R.id.iv_send_status);
             }
 
             public void bindView(IMMessage message) {
                 String fromUid = message.fromUid;
                 if (fromUid.contains(client.getClientId())) {
-                    tvSend.setText(fromUid + " : <status :  "
-                            + message.status
-                            + "  "
-                            + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss")
-                            + " >" + message.payload);
-                    tvSend.setVisibility(View.VISIBLE);
-                    tvReceived.setVisibility(View.GONE);
+
+                    tvSendName.setText(message.fromUid);
+                    tvSendMsg.setText(message.payload + "\n\n" + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss"));
+                    if (message.status == IMConstants.MSG_SEND_STATUS_SENDING) {
+                        ivSendStatus.setImageResource(R.drawable.ic_loading_blue);
+                    } else if (message.status == IMConstants.MSG_SEND_STATUS_COMPLETED) {
+                        ivSendStatus.setImageResource(R.drawable.ic_send_success);
+                    } else {
+                        ivSendStatus.setImageResource(R.drawable.ic_send_failed);
+                    }
+
+                    tvSendName.setVisibility(View.VISIBLE);
+                    tvSendMsg.setVisibility(View.VISIBLE);
+                    ivSendStatus.setVisibility(View.VISIBLE);
+                    tvReceivedName.setVisibility(View.GONE);
+                    tvReceivedMsg.setVisibility(View.GONE);
+                    ivReceivedStatus.setVisibility(View.GONE);
+
                 } else {
-                    tvReceived.setText(message.toUid + " : <status :  "
-                            + message.status
-                            + "  "
-                            + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss")
-                            + " >" + message.payload);
-                    tvReceived.setVisibility(View.VISIBLE);
-                    tvSend.setVisibility(View.GONE);
+                    tvReceivedName.setText(message.fromUid);
+                    tvReceivedMsg.setText(message.payload + "\n  " + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss"));
+                    if (message.status == IMConstants.MSG_SEND_STATUS_SENDING) {
+                        ivReceivedStatus.setImageResource(R.drawable.ic_loading_blue);
+                    } else if (message.status == IMConstants.MSG_SEND_STATUS_COMPLETED) {
+                        ivReceivedStatus.setImageResource(R.drawable.ic_send_success);
+                    } else {
+                        ivReceivedStatus.setImageResource(R.drawable.ic_send_failed);
+                    }
+
+                    tvReceivedName.setVisibility(View.VISIBLE);
+                    tvReceivedMsg.setVisibility(View.VISIBLE);
+                    ivReceivedStatus.setVisibility(View.VISIBLE);
+                    tvSendName.setVisibility(View.GONE);
+                    tvSendMsg.setVisibility(View.GONE);
+                    ivSendStatus.setVisibility(View.GONE);
                 }
             }
         }

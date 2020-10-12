@@ -31,4 +31,5 @@
     <color name="green2">#13C4D1</color>
     <color name="green3">#3013C4D1</color>
     <color name="yellow">#F7B500</color>
+    <color name="black">#000000</color>
 </resources>
