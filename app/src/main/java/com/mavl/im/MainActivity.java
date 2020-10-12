@@ -19,7 +19,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MqttManager.release();
     }
 
     private void init() {
