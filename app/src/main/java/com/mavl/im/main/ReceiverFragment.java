@@ -23,13 +23,12 @@ import com.mavl.im.BaseFragment;
 import com.mavl.im.IMManager;
 import com.mavl.im.R;
 import com.mavl.im.db.DaoUtil;
+import com.mavl.im.entity.Message;
 import com.mavl.im.event.ConnectEvent;
-import com.mavl.im.sdk.IMMessageClient;
-import com.mavl.im.sdk.IMConstants;
+import com.mavl.im.sdk.IMMessageBroker;
+import com.mavl.im.sdk.listener.IMMessageStatusDelegate;
 import com.mavl.im.sdk.util.Logger;
 import com.mavl.im.sdk.entity.IMMessage;
-import com.mavl.im.sdk.listener.IMMessageStatusListener;
-import com.mavl.im.util.SharedPreferencesUtil;
 import com.mavl.im.util.TimeUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -45,9 +44,9 @@ public class ReceiverFragment extends BaseFragment {
     private EditText editText;
     private Button button;
     private TextView clientStatusTv;
-    private IMMessageClient client;
+    private IMMessageBroker client;
     private MessageAdapter adapter;
-    private List<IMMessage> mList;
+    private List<Message> mList;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -120,7 +119,7 @@ public class ReceiverFragment extends BaseFragment {
                     IMManager.getInstance(getActivity()).client1logout();
                 } else {
                     try {
-                        client.doConnect(null);
+                        client.login();
                     } catch (Exception e) {
                         e.printStackTrace();
                         Logger.e("client1 do connect exception : " + e.toString());
@@ -143,24 +142,22 @@ public class ReceiverFragment extends BaseFragment {
                 }
 
                 IMMessage message = new IMMessage();
-                message.retained = (boolean) SharedPreferencesUtil.get(getActivity(), SharedPreferencesUtil.PREF_CLIENT1_RETAINED, true);
                 message.payload = text;
-                message.qos = (int) SharedPreferencesUtil.get(getActivity(), SharedPreferencesUtil.PREF_CLIENT1_QOS, 1);
                 message.timeStamp = System.currentTimeMillis();
                 try {
-                    IMMessageClient client2 = IMManager.getInstance(getActivity()).getClient("client2");
+                    IMMessageBroker client2 = IMManager.getInstance(getActivity()).getClient("client2");
                     if (client2 == null) {
                         Toast.makeText(getActivity(), "对方用户不存在", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    client.publishOneToOne(client2.getClientId(), message, null);
+                    client.sendToMessage(text, false, client2.getClientId());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
 
-        client.setIMCallback(new IMMessageStatusListener() {
+        client.setIMMessageStatusDelegate(new IMMessageStatusDelegate() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
                 updateClientStatus();
@@ -173,51 +170,74 @@ public class ReceiverFragment extends BaseFragment {
 
             @Override
             public void onSendingMessage(IMMessage imMessage) {
-                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
-//                Logger.d("onSendingMessage() message ---> " + message);
-                if (message == null) {
-                    DaoUtil.saveMessage(getActivity(), imMessage);
-                } else {
-                    DaoUtil.updateMessageStatus(getActivity(), imMessage);
-                }
+
+                Message newMsg = new Message();
+                newMsg.messageId = imMessage.messageId;
+                newMsg.messageLocalId = imMessage.messageLocalId;
+                newMsg.fromUid = imMessage.fromUid;
+                newMsg.toUid = imMessage.toUid;
+                newMsg.isReceived = false;
+                newMsg.payload = imMessage.payload;
+                newMsg.status = 0;
+                DaoUtil.saveMessage(getActivity(), newMsg);
+
                 updateData();
             }
 
             @Override
-            public void onSendCompletedMessage(int msgClientId, String payload) {
-                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), msgClientId);
-//                Logger.d("onSendCompletedMessage() message ---> " + message);
-                if (message != null) {
-                    message.status = IMConstants.MSG_SEND_STATUS_COMPLETED;
-                    DaoUtil.updateMessageStatus(getActivity(), message);
+            public void onSendDoneMessage(IMMessage imMessage) {
+                Message messageOld = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageLocalId);
+                Logger.d("客户端 1: onSendDoneMessage() message ---> " + messageOld);
+                if (messageOld != null) {
+                    messageOld.status = 1;
+                    DaoUtil.updateMessageStatus(getActivity(), messageOld);
                 }
             }
 
             @Override
             public void onReceivedMessage(IMMessage imMessage) {
-//                Logger.d("received last msg ---> " + imMessage);
+                Message messageOld = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageLocalId);
+                Logger.d("客户端 1: onReceivedMessage() message ---> " + messageOld);
 
-                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
-//                Logger.d("onReceivedMessage() message ---> " + message);
-                if (message == null) {
-                    DaoUtil.saveMessage(getActivity(), imMessage);
+                Message newMsg = new Message();
+                newMsg.messageId = imMessage.messageId;
+                newMsg.messageLocalId = imMessage.messageLocalId;
+                newMsg.fromUid = imMessage.fromUid;
+                newMsg.toUid = imMessage.toUid;
+                newMsg.isReceived = false;
+                newMsg.payload = imMessage.payload;
+                newMsg.status = 1;
+
+                if (messageOld == null) {
+                    DaoUtil.saveMessage(getActivity(), newMsg);
                 } else {
-                    DaoUtil.updateMessage(getActivity(), imMessage);
+                    DaoUtil.updateMessage(getActivity(), newMsg);
                 }
                 updateData();
             }
 
             @Override
             public void onSendFailedMessage(IMMessage imMessage, Throwable exception) {
-                IMMessage message = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageClientId);
-                if (message == null) {
-                    DaoUtil.saveMessage(getActivity(), imMessage);
+                Message messageOld = DaoUtil.getIMMessageByClientId(getActivity(), imMessage.messageLocalId);
+
+                Message newMsg = new Message();
+                newMsg.messageId = imMessage.messageId;
+                newMsg.messageLocalId = imMessage.messageLocalId;
+                newMsg.fromUid = imMessage.fromUid;
+                newMsg.toUid = imMessage.toUid;
+                newMsg.isReceived = false;
+                newMsg.payload = imMessage.payload;
+                newMsg.status = 2;
+
+                if (messageOld == null) {
+                    DaoUtil.saveMessage(getActivity(), newMsg);
                 } else {
-                    DaoUtil.updateMessageStatus(getActivity(), imMessage);
+                    DaoUtil.updateMessageStatus(getActivity(), newMsg);
                 }
                 updateData();
             }
         });
+
     }
 
     public String getClientName() {
@@ -245,12 +265,12 @@ public class ReceiverFragment extends BaseFragment {
 
     private class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
-        private List<IMMessage> mList;
+        private List<Message> mList;
 
         /**
          * 刷新列表数据。
          */
-        public void updateList(List<IMMessage> list) {
+        public void updateList(List<Message> list) {
             if (mList == null) mList = new ArrayList<>();
             mList.clear();
             if (list != null) mList.addAll(list);
@@ -291,15 +311,15 @@ public class ReceiverFragment extends BaseFragment {
                 ivSendStatus = itemView.findViewById(R.id.iv_send_status);
             }
 
-            public void bindView(IMMessage message) {
+            public void bindView(Message message) {
                 String fromUid = message.fromUid;
                 if (fromUid.contains(client.getClientId())) {
 
                     tvSendName.setText(message.fromUid);
                     tvSendMsg.setText(message.payload + "\n\n" + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss"));
-                    if (message.status == IMConstants.MSG_SEND_STATUS_SENDING) {
+                    if (message.status == 0) {
                         ivSendStatus.setImageResource(R.drawable.ic_loading_blue);
-                    } else if (message.status == IMConstants.MSG_SEND_STATUS_COMPLETED) {
+                    } else if (message.status == 1) {
                         ivSendStatus.setImageResource(R.drawable.ic_send_success);
                     } else {
                         ivSendStatus.setImageResource(R.drawable.ic_send_failed);
@@ -315,9 +335,9 @@ public class ReceiverFragment extends BaseFragment {
                 } else {
                     tvReceivedName.setText(message.fromUid);
                     tvReceivedMsg.setText(message.payload + "\n  " + TimeUtil.getDataTimeFormat(message.timeStamp, "yyyy-MM-dd HH:mm:ss"));
-                    if (message.status == IMConstants.MSG_SEND_STATUS_SENDING) {
+                    if (message.status == 0) {
                         ivReceivedStatus.setImageResource(R.drawable.ic_loading_blue);
-                    } else if (message.status == IMConstants.MSG_SEND_STATUS_COMPLETED) {
+                    } else if (message.status == 1) {
                         ivReceivedStatus.setImageResource(R.drawable.ic_send_success);
                     } else {
                         ivReceivedStatus.setImageResource(R.drawable.ic_send_failed);

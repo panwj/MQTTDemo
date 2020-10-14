@@ -1,27 +1,28 @@
-package com.mavl.im.sdk.entity;
+package com.mavl.im.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 
-public class IMMessage implements Parcelable {
+public class Message implements Parcelable {
 
     public String messageId;//消息的真实ID，由后台返回
-    public int messageLocalId = (int) System.currentTimeMillis();//消息的本地ID，用于与后台返回的消息体对应
+    public int messageLocalId = hashCode();//消息的本地ID，用于与后台返回的消息体对应
     public String payload = "";//消息内容
     public long timeStamp;//生成消息的时间戳，毫秒
-    public int status;
+    public int status;//0: 正在发送, 1: 发送成功, 2:发送失败
     public String fromUid = "";
     public String toUid = "";
+    public boolean isReceived = true;
 
-    public static final Creator<IMMessage> CREATOR = new Creator<IMMessage>() {
+    public static final Creator<Message> CREATOR = new Creator<Message>() {
 
-        public IMMessage createFromParcel(Parcel in) {
-            return new IMMessage(in);
+        public Message createFromParcel(Parcel in) {
+            return new Message(in);
         }
 
-        public IMMessage[] newArray(int size) {
-            return new IMMessage[size];
+        public Message[] newArray(int size) {
+            return new Message[size];
         }
     };
 
@@ -33,13 +34,14 @@ public class IMMessage implements Parcelable {
         out.writeInt(status);
         out.writeString(fromUid);
         out.writeString(toUid);
+        out.writeInt(isReceived ? 1 : 0);
     }
 
-    public IMMessage() {
+    public Message() {
 
     }
 
-    private IMMessage(Parcel in) {
+    private Message(Parcel in) {
         messageId = in.readString();
         messageLocalId = in.readInt();
         payload = in.readString();
@@ -47,6 +49,7 @@ public class IMMessage implements Parcelable {
         status = in.readInt();
         fromUid = in.readString();
         toUid = in.readString();
+        isReceived = in.readInt() == 1 ? true : false;
     }
 
     @Override
@@ -56,14 +59,15 @@ public class IMMessage implements Parcelable {
 
     @Override
     public String toString() {
-        return "IMMessage{" +
-                "messageId=" + messageId +
+        return "Message{" +
+                "messageId='" + messageId + '\'' +
                 ", messageLocalId=" + messageLocalId +
                 ", payload='" + payload + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", status=" + status +
-                ", fromUid=" + fromUid +
-                ", toUid=" + toUid +
+                ", fromUid='" + fromUid + '\'' +
+                ", toUid='" + toUid + '\'' +
+                ", isReceived=" + isReceived +
                 '}';
     }
 }

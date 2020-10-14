@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
-import com.mavl.im.sdk.IMMessageClient;
+import com.mavl.im.sdk.IMMessageBroker;
 
 public class SplashActivity extends BaseActivity {
 
@@ -13,7 +13,7 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        IMMessageClient client1 = IMManager.getInstance(getApplicationContext()).getClient("client1");
+        IMMessageBroker client1 = IMManager.getInstance(getApplicationContext()).getClient("client1");
         if (client1 == null || !client1.isConnect()) {
             launchSignInActivity();
         } else {

@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.mavl.im.event.ConnectEvent;
-import com.mavl.im.sdk.IMMessageClient;
+import com.mavl.im.sdk.IMMessageBroker;
 import com.mavl.im.sdk.util.Logger;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -30,8 +30,9 @@ public class SignInActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    IMMessageClient client = IMManager.getInstance(getApplicationContext()).createDefaultAccount1();
-                    client.doConnect(null);
+                    showProgressDialog();
+                    IMMessageBroker client = IMManager.getInstance(getApplicationContext()).createDefaultAccount1();
+                    client.login();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Logger.e("client1 do connect exception : " + e.toString());
@@ -61,9 +62,6 @@ public class SignInActivity extends BaseActivity {
                     mErrorTv.setText(connectEvent.error);
                 }
                 break;
-            case CONNECTING:
-                showProgressDialog();
-                break;
             case CONNECTED:
                 hideProgressDialog();
                 if (mErrorTv != null) {
@@ -76,10 +74,6 @@ public class SignInActivity extends BaseActivity {
                         }
                     });
                 }
-                break;
-            case DISCONNECTING:
-                break;
-            case DISCONNECTED:
                 break;
         }
     }

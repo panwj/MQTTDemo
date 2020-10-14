@@ -3,15 +3,13 @@ package com.mavl.im;
 import android.content.Context;
 
 import com.mavl.im.event.ConnectEvent;
-import com.mavl.im.sdk.IMMessageClient;
-import com.mavl.im.sdk.util.Logger;
+import com.mavl.im.sdk.IMMessageBroker;
+import com.mavl.im.sdk.listener.IMMessageDelegate;
 import com.mavl.im.sdk.config.IMClientConfig;
 import com.mavl.im.sdk.config.IMGlobalConfig;
-import com.mavl.im.sdk.listener.ConnectionStatus;
-import com.mavl.im.sdk.listener.IMClientListener;
+import com.mavl.im.util.ConnectionStatus;
 import com.mavl.im.util.SharedPreferencesUtil;
 
-import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
@@ -21,7 +19,7 @@ public class IMManager {
 
     private Context mContext;
     private static volatile IMManager mInstance;
-    private Map<String, IMMessageClient> mClients = new HashMap<>();
+    private Map<String, IMMessageBroker> mClients = new HashMap<>();
 
     public static IMManager getInstance(Context context) {
         if (mInstance == null) {
@@ -38,10 +36,9 @@ public class IMManager {
         mContext = context.getApplicationContext();
     }
 
-    public IMMessageClient createDefaultAccount1() {
+    public IMMessageBroker createDefaultAccount1() {
         IMClientConfig config1 = new IMClientConfig.Builder()
-                .setClientId("client1")
-                .setName("client1")
+                .setUsername("client1")
                 .setPassword("client1")
                 .setTimeout(30)
                 .setKeepAlive(60)
@@ -49,47 +46,44 @@ public class IMManager {
                 .setCleanSession((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT1_CLEAN_SESSION, true))
                 .setAutomaticReconnect((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT1_AUTO_RECONNECT, true))
                 .build();
-        IMMessageClient client1 = IMMessageClient.createConnectClient(mContext, config1);
-        client1.setIMClientListener(new IMClientListener() {
-            @Override
-            public void onConnecting(ConnectionStatus status) {
-                postConnectEvent(status, null);
-            }
 
-            @Override
-            public void onConnectSuccess(ConnectionStatus status, IMqttToken asyncActionToken) {
-                postConnectEvent(status, null);
-            }
+        try {
+            IMMessageBroker client1 = IMMessageBroker.createMessageBroker(mContext, config1);
+            client1.setIMMessageDelegate(new IMMessageDelegate() {
 
-            @Override
-            public void onConnectFailure(ConnectionStatus status, IMqttToken asyncActionToken, Throwable exception) {
-                postConnectEvent(status, exception);
-            }
+                @Override
+                public void loginSuccess() {
+                    postConnectEvent(ConnectionStatus.CONNECTED, null);
+                }
 
-            @Override
-            public void onDisConnecting(ConnectionStatus status) {
-                postConnectEvent(status, null);
-            }
+                @Override
+                public void loginError(Throwable throwable) {
+                    postConnectEvent(ConnectionStatus.ERROR, throwable);
+                }
 
-            @Override
-            public void onDisConnectSuccess(ConnectionStatus status, IMqttToken asyncActionToken) {
-                postConnectEvent(status, null);
-            }
+                @Override
+                public void logoutSuccess() {
+                    postConnectEvent(ConnectionStatus.DISCONNECTED, null);
+                }
 
-            @Override
-            public void onDisConnectFailure(ConnectionStatus status, IMqttToken asyncActionToken, Throwable exception) {
-                postConnectEvent(status, exception);
-            }
-        });
+                @Override
+                public void logoutError(Throwable throwable) {
+                    postConnectEvent(ConnectionStatus.ERROR, throwable);
+                }
+            });
 
-        addClient(client1);
-        return client1;
+            addClient(client1);
+            return client1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public IMMessageClient createDefaultAccount2() {
+    public IMMessageBroker createDefaultAccount2() {
         IMClientConfig config2 = new IMClientConfig.Builder()
-                .setClientId("client2")
-                .setName("client2")
+                .setUsername("client2")
                 .setPassword("client2")
                 .setTimeout(30)
                 .setKeepAlive(60)
@@ -97,44 +91,40 @@ public class IMManager {
                 .setCleanSession((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT2_CLEAN_SESSION, true))
                 .setAutomaticReconnect((boolean) SharedPreferencesUtil.get(mContext, SharedPreferencesUtil.PREF_CLIENT2_AUTO_RECONNECT, true))
                 .build();
-        IMMessageClient client2 = IMMessageClient.createConnectClient(mContext, config2);
-        client2.setIMClientListener(new IMClientListener() {
-            @Override
-            public void onConnecting(ConnectionStatus status) {
-                postConnectEvent(status, null);
-            }
 
-            @Override
-            public void onConnectSuccess(ConnectionStatus status, IMqttToken asyncActionToken) {
-                postConnectEvent(status, null);
-            }
+        try {
+            IMMessageBroker client2 = IMMessageBroker.createMessageBroker(mContext, config2);
+            client2.setIMMessageDelegate(new IMMessageDelegate() {
 
-            @Override
-            public void onConnectFailure(ConnectionStatus status, IMqttToken asyncActionToken, Throwable exception) {
-                postConnectEvent(status, exception);
-            }
+                @Override
+                public void loginSuccess() {
+                    postConnectEvent(ConnectionStatus.CONNECTED, null);
+                }
 
-            @Override
-            public void onDisConnecting(ConnectionStatus status) {
-                postConnectEvent(status, null);
-            }
+                @Override
+                public void loginError(Throwable throwable) {
+                    postConnectEvent(ConnectionStatus.ERROR, throwable);
+                }
 
-            @Override
-            public void onDisConnectSuccess(ConnectionStatus status, IMqttToken asyncActionToken) {
-                postConnectEvent(status, null);
-            }
+                @Override
+                public void logoutSuccess() {
+                    postConnectEvent(ConnectionStatus.DISCONNECTED, null);
+                }
 
-            @Override
-            public void onDisConnectFailure(ConnectionStatus status, IMqttToken asyncActionToken, Throwable exception) {
-                postConnectEvent(status, exception);
-            }
-        });
-
-        addClient(client2);
-        return client2;
+                @Override
+                public void logoutError(Throwable throwable) {
+                    postConnectEvent(ConnectionStatus.ERROR, null);
+                }
+            });
+            addClient(client2);
+            return client2;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public void addClient(IMMessageClient client) {
+    public void addClient(IMMessageBroker client) {
         if (client == null) return;
         if (!mClients.containsKey(client.getClientId())) {
             mClients.put(client.getClientId(), client);
@@ -144,38 +134,26 @@ public class IMManager {
         }
     }
 
-    public Map<String, IMMessageClient> getClients() {
+    public Map<String, IMMessageBroker> getClients() {
         return mClients;
     }
 
-    public IMMessageClient getClient(String clientId) {
+    public IMMessageBroker getClient(String clientId) {
         clientId = IMGlobalConfig.getAppId() + "_" + clientId;
         return mClients.get(clientId);
     }
 
     public void client1logout() {
-        IMMessageClient client1 = getClient("client1");
+        IMMessageBroker client1 = getClient("client1");
         if (client1 != null && client1.isConnect()) {
-            try {
-                client1.disConnect(3, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Logger.e("client1 disConnect exception : " + e.toString());
-                postConnectEvent(ConnectionStatus.ERROR, new Throwable(e));
-            }
+            client1.logout();
         }
     }
 
     public void client2logout() {
-        IMMessageClient client2 = getClient("client2");
+        IMMessageBroker client2 = getClient("client2");
         if (client2 != null && client2.isConnect()) {
-            try {
-                client2.disConnect(3, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Logger.e("client2 disConnect exception : " + e.toString());
-                postConnectEvent(ConnectionStatus.ERROR, new Throwable(e));
-            }
+            client2.logout();
         }
     }
 

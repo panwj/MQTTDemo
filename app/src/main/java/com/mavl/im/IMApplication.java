@@ -12,6 +12,7 @@ public class IMApplication extends Application {
 
         IMGlobalConfig config = new IMGlobalConfig.IMGlobalConfigBuilder()
                 .setAppId("56")
+                .setDebug(true)
                 .build();
         IMGlobalConfig.initializeSDK(config);
     }

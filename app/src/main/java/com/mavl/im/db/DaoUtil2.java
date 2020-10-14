@@ -5,14 +5,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.mavl.im.entity.Message;
 import com.mavl.im.sdk.util.Logger;
-import com.mavl.im.sdk.entity.IMMessage;
+
 
 import java.util.ArrayList;
 
 public class DaoUtil2 {
 
-    public static void saveMessage(Context context, IMMessage imMessage) {
+    public static void saveMessage(Context context, Message imMessage) {
         try {
             if (imMessage == null) return;
             SQLiteDatabase db = DaoManager.getInstance(context).getWritableDatabase();
@@ -23,9 +24,6 @@ public class DaoUtil2 {
                         + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_ID + ", "
                         + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_CLIENT_ID + ", "
                         + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_PAYLOAD + ", "
-                        + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_QOS + ", "
-                        + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_RETAINED + ", "
-                        + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_DUP + ", "
                         + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_TIMESTAMP + ", "
                         + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_STATUS + ", "
                         + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_IS_RECEIVED + ", "
@@ -34,11 +32,8 @@ public class DaoUtil2 {
                         + ") VALUES "
                         + "('"
                         + imMessage.messageId + "',"
-                        + imMessage.messageClientId + ",'"
+                        + imMessage.messageLocalId + ",'"
                         + imMessage.payload.replaceAll("'", "''") + "',"//避免名称中的单引号，导致sql语法错误。
-                        + imMessage.qos + ","
-                        + (imMessage.retained ? 1 : 0) + ","
-                        + (imMessage.dup ? 1 : 0) + ","
                         + imMessage.timeStamp + ","
                         + imMessage.status + ","
                         + (imMessage.isReceived ? 1 : 0) + ",'"
@@ -60,21 +55,18 @@ public class DaoUtil2 {
         }
     }
 
-    public static void saveMessage(Context context, ArrayList<IMMessage> list) {
+    public static void saveMessage(Context context, ArrayList<Message> list) {
         try {
             if (list == null || list.size() <= 0) return;
             SQLiteDatabase db = DaoManager.getInstance(context).getWritableDatabase();
             db.beginTransaction();
             try {
-                for (IMMessage imMessage : list) {
+                for (Message imMessage : list) {
                     String sql = "INSERT INTO " + DaoConstants.MessageEntry2.DATABASE_TABLE_MESSAGES
                             + "("
                             + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_ID + ", "
                             + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_CLIENT_ID + ", "
                             + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_PAYLOAD + ", "
-                            + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_QOS + ", "
-                            + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_RETAINED + ", "
-                            + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_DUP + ", "
                             + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_TIMESTAMP + ", "
                             + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_STATUS + ", "
                             + DaoConstants.MessageEntry2.COLUMNS_MESSAGE_IS_RECEIVED + ", "
@@ -83,11 +75,8 @@ public class DaoUtil2 {
                             + ") VALUES "
                             + "('"
                             + imMessage.messageId + "',"
-                            + imMessage.messageClientId + ",'"
+                            + imMessage.messageLocalId + ",'"
                             + imMessage.payload.replaceAll("'", "''") + "',"//避免名称中的单引号，导致sql语法错误。
-                            + imMessage.qos + ","
-                            + (imMessage.retained ? 1 : 0) + ","
-                            + (imMessage.dup ? 1 : 0) + ","
                             + imMessage.timeStamp + ","
                             + imMessage.status + ","
                             + (imMessage.isReceived ? 1 : 0) + ",'"
@@ -110,7 +99,7 @@ public class DaoUtil2 {
         }
     }
 
-    public static void updateMessage(Context context, IMMessage message) {
+    public static void updateMessage(Context context, Message message) {
         try {
             ContentValues contentValues = new ContentValues();
             contentValues.put(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_ID, message.messageId);
@@ -121,7 +110,7 @@ public class DaoUtil2 {
             contentValues.put(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_TO_UID, message.toUid);
 
             String whereClause = DaoConstants.MessageEntry2.COLUMNS_MESSAGE_CLIENT_ID + "=?";
-            String[] whereArgs = new String[]{String.valueOf(message.messageClientId)};
+            String[] whereArgs = new String[]{String.valueOf(message.messageLocalId)};
 
             DaoManager.getInstance(context).getWritableDatabase().update(DaoConstants.MessageEntry2.DATABASE_TABLE_MESSAGES,
                     contentValues, whereClause, whereArgs);
@@ -134,13 +123,13 @@ public class DaoUtil2 {
         }
     }
 
-    public static void updateMessageStatus(Context context, IMMessage message) {
+    public static void updateMessageStatus(Context context, Message message) {
         try {
             ContentValues contentValues = new ContentValues();
             contentValues.put(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_STATUS, message.status);
 
             String whereClause = DaoConstants.MessageEntry2.COLUMNS_MESSAGE_CLIENT_ID + "=?";
-            String[] whereArgs = new String[]{String.valueOf(message.messageClientId)};
+            String[] whereArgs = new String[]{String.valueOf(message.messageLocalId)};
 
             DaoManager.getInstance(context).getWritableDatabase().update(DaoConstants.MessageEntry2.DATABASE_TABLE_MESSAGES,
                     contentValues, whereClause, whereArgs);
@@ -153,15 +142,15 @@ public class DaoUtil2 {
         }
     }
 
-    public static ArrayList<IMMessage> getMessageList(Context context) {
-        ArrayList<IMMessage> list = new ArrayList<>();
+    public static ArrayList<Message> getMessageList(Context context) {
+        ArrayList<Message> list = new ArrayList<>();
         Cursor cursor = null;
         try {
             cursor = DaoManager.getInstance(context).getReadableDatabase().query(DaoConstants.MessageEntry2.DATABASE_TABLE_MESSAGES, null, null, null, null, null, DaoConstants.MessageEntry2.COLUMNS_MESSAGE_TIMESTAMP + " ASC");
             if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {
-                    IMMessage message = getMessageFromCursor(cursor);
+                    Message message = getMessageFromCursor(cursor);
                     list.add(message);
                     cursor.moveToNext();
                 }
@@ -175,8 +164,8 @@ public class DaoUtil2 {
         return list;
     }
 
-    public static IMMessage getIMMessageByClientId(Context context, int msgClientId) {
-        IMMessage object = null;
+    public static Message getIMMessageByClientId(Context context, int msgClientId) {
+        Message object = null;
         Cursor cursor = null;
         try {
             String whereClause = DaoConstants.MessageEntry2.COLUMNS_MESSAGE_CLIENT_ID + "=?";
@@ -199,8 +188,8 @@ public class DaoUtil2 {
         return object;
     }
 
-    public static IMMessage getIMMessageByServerId(Context context, String msgServerId) {
-        IMMessage object = null;
+    public static Message getIMMessageByServerId(Context context, String msgServerId) {
+        Message object = null;
         Cursor cursor = null;
         try {
             String whereClause = DaoConstants.MessageEntry2.COLUMNS_MESSAGE_ID + "=?";
@@ -261,14 +250,11 @@ public class DaoUtil2 {
         return false;
     }
 
-    private static IMMessage getMessageFromCursor(Cursor cursor) {
-        IMMessage message = new IMMessage();
+    private static Message getMessageFromCursor(Cursor cursor) {
+        Message message = new Message();
         String id = cursor.getString(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_ID));
         int clientId = cursor.getInt(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_CLIENT_ID));
         String payload = cursor.getString(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_PAYLOAD));
-        int qos = cursor.getInt(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_QOS));
-        int retained = cursor.getInt(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_RETAINED));
-        int dup = cursor.getInt(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_DUP));
         long timeStamp = cursor.getLong(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_TIMESTAMP));
         int status = cursor.getInt(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_STATUS));
         int isReceived = cursor.getInt(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_IS_RECEIVED));
@@ -276,11 +262,8 @@ public class DaoUtil2 {
         String toUid = cursor.getString(cursor.getColumnIndexOrThrow(DaoConstants.MessageEntry2.COLUMNS_MESSAGE_TO_UID));
 
         message.messageId = id;
-        message.messageClientId = clientId;
+        message.messageLocalId = clientId;
         message.payload = payload;
-        message.qos = qos;
-        message.retained = (retained == 1 ? true : false);
-        message.dup = (dup == 1 ? true : false);
         message.timeStamp = timeStamp;
         message.status = status;
         message.isReceived = (isReceived == 1 ? true : false);

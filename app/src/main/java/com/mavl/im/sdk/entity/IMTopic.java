@@ -3,11 +3,13 @@ package com.mavl.im.sdk.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.mavl.im.sdk.IMConstants;
+
 public class IMTopic implements Parcelable {
 
     public String appId = "";
-    public int operation;
-    public int messageClientId;
+    public int operation = IMConstants.Operation.OPERATION_UNKNOWN;
+    public int messageLocalId;
     public String messageId = "";
     public String toUid = "";
     public String fromUid = "";
@@ -31,7 +33,7 @@ public class IMTopic implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(appId);
         out.writeInt(operation);
-        out.writeInt(messageClientId);
+        out.writeInt(messageLocalId);
         out.writeString(messageId);
         out.writeString(toUid);
         out.writeString(fromUid);
@@ -41,7 +43,7 @@ public class IMTopic implements Parcelable {
     private IMTopic(Parcel in) {
         appId = in.readString();
         operation = in.readInt();
-        messageClientId = in.readInt();
+        messageLocalId = in.readInt();
         messageId = in.readString();
         toUid = in.readString();
         fromUid = in.readString();
@@ -58,7 +60,7 @@ public class IMTopic implements Parcelable {
         return "IMTopic{" +
                 "appId='" + appId + '\'' +
                 ", operation=" + operation +
-                ", messageClientId=" + messageClientId +
+                ", messageLocalId=" + messageLocalId +
                 ", messageId='" + messageId + '\'' +
                 ", toUid='" + toUid + '\'' +
                 ", fromUid='" + fromUid + '\'' +

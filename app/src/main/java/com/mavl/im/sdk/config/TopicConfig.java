@@ -5,7 +5,9 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import com.mavl.im.sdk.IMConstants;
 import com.mavl.im.sdk.entity.IMTopic;
+import com.mavl.im.sdk.util.Logger;
 
 public class TopicConfig {
 
@@ -20,8 +22,8 @@ public class TopicConfig {
         for (int i = 0; i < fields.length; i++) {
         }
         imTopic.appId = 0 < length ? fields[0] : "";
-        imTopic.operation = 1 < length ? Integer.parseInt(fields[1]) : IMOperationConfig.OPERATION_1;
-        imTopic.messageClientId = 2 < length ? Integer.valueOf(fields[2]) : 0;
+        imTopic.operation = 1 < length ? Integer.parseInt(fields[1]) : IMConstants.Operation.OPERATION_UNKNOWN;
+        imTopic.messageLocalId = 2 < length ? Integer.valueOf(fields[2]) : 0;
         imTopic.toUid = 3 < length ? fields[3] : "";
         imTopic.messageId = 4 < length ? fields[4] : "";
         imTopic.fromUid = 5 < length ? fields[5] : "";
@@ -34,6 +36,14 @@ public class TopicConfig {
         return imTopic;
     }
 
+    public static String createTopic(IMTopic topic) {
+        if (topic == null) return "";
+        String topicStr = IMGlobalConfig.getAppId() + SEPARATOR + topic.operation
+                + SEPARATOR + topic.messageLocalId + SEPARATOR + topic.toUid;
+        Logger.e("createTopic() : " + topicStr);
+        return topicStr;
+    }
+
     /**
      * 发送1v1消息
      * @param localId 本地消息id（为区分发送消息与后台返回消息体一致，messageId是后台返回的消息体id，是唯一id）
@@ -41,7 +51,7 @@ public class TopicConfig {
      * @return
      */
     public static String createOneToOneTopic(String localId, @NonNull String toUid) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_1
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_SEND_MSG_ONE_TO_ONE
                 + SEPARATOR + localId + SEPARATOR + toUid;
         return topic;
     }
@@ -52,7 +62,7 @@ public class TopicConfig {
      * @return
      */
     public static String createGroupTopic(String localId) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_0
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_CREATE_GROUP
                 + SEPARATOR + localId + SEPARATOR;
         return topic;
     }
@@ -64,7 +74,7 @@ public class TopicConfig {
      * @return
      */
     public static String createOneToGroupTopic(String localId, @NonNull String toGid) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_2
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_SEND_MSG_GROUP
                 + SEPARATOR + localId + SEPARATOR + toGid;
         return topic;
     }
@@ -76,7 +86,7 @@ public class TopicConfig {
      * @return
      */
     public static String createVirtualToGroupTopic(String localId, String toGid) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_3
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_SEND_MSG_VIRTUAL
                 + SEPARATOR + localId + SEPARATOR + toGid;
         return topic;
     }
@@ -88,7 +98,7 @@ public class TopicConfig {
      * @return
      */
     public static String createAddGroupTopic(String localId, @NonNull String gid) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_201
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_JOIN_GROUP
                 + SEPARATOR + localId + SEPARATOR + gid;
         return topic;
     }
@@ -100,7 +110,7 @@ public class TopicConfig {
      * @return
      */
     public static String createQuitGroupTopic(String localId, @NonNull String gid) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_202
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_QUIT_GROUP
                 + SEPARATOR + localId + SEPARATOR + gid;
         return topic;
     }
@@ -111,7 +121,7 @@ public class TopicConfig {
      * @return
      */
     public static String createUploadDeviceTopic(String localId) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_300
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_UPLOAD_DEVICE_TOKEN
                 + SEPARATOR + localId + SEPARATOR;
         return topic;
     }
@@ -127,7 +137,7 @@ public class TopicConfig {
      * @return
      */
     public static String createHistoryMsgTopic(String localId, String fromUid, int type, long cursorTime, int offset, boolean all) {
-        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMOperationConfig.OPERATION_401
+        String topic = IMGlobalConfig.getAppId() + SEPARATOR + IMConstants.Operation.OPERATION_GET_HISTORY_MSG
                 + SEPARATOR + localId + SEPARATOR + fromUid + SEPARATOR + type + SEPARATOR
                 + (all ? "" : cursorTime) + SEPARATOR + offset;
         return topic;

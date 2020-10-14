@@ -2,53 +2,48 @@ package com.mavl.im.sdk.config;
 
 import androidx.annotation.NonNull;
 
+import com.mavl.im.sdk.IMConstants;
+
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 public class IMClientConfig {
 
-    public String clientId = "";
-    public String userName = "";
-    public String password = "";
-    public int timeout = 30;
-    public int keepAlive = 60;
-    public int mqttVersion = MqttConnectOptions.MQTT_VERSION_3_1_1;
+    private String username = "";
+    private String password = "";
+    private int connectionTimeout = IMConstants.CONNECTION_TIMEOUT_DEFAULT;
+    private int keepAliveInterval = IMConstants.KEEP_ALIVE_INTERVAL_DEFAULT;
     /**
      * 会话清除标识session, 标识 Client 是否建立一个持久化的会话
      */
-    public boolean cleanSession = true;
-    public boolean tlsConnection = true;
-    public boolean automaticReconnect = true;
+    private boolean cleanSession = true;
+    private boolean tlsConnection = true;
+    private boolean automaticReconnect = true;
+
+    private int mqttVersion = MqttConnectOptions.MQTT_VERSION_3_1_1;
 
     private IMClientConfig(Builder builder) {
-        this.clientId = IMGlobalConfig.getAppId() + "_" + builder.clientId;
-        this.userName = IMGlobalConfig.getAppId() + "_" + builder.userName;
-        this.password = builder.password + "_" + IMGlobalConfig.getAppToken();
-        this.timeout = builder.timeout;
-        this.keepAlive = builder.keepAlive;
-        this.mqttVersion = builder.mqttVersion;
+        if (builder == null) return;
+
+        this.username = builder.username;
+        this.password = builder.password;
+        this.connectionTimeout = builder.connectionTimeout;
+        this.keepAliveInterval = builder.keepAliveInterval;
         this.cleanSession = builder.cleanSession;
         this.tlsConnection = builder.tlsConnection;
         this.automaticReconnect = builder.automaticReconnect;
     }
 
     public static class Builder {
-        private String clientId = "";
-        private String userName = "";
+        private String username = "";
         private String password = "";
-        private int timeout = 30;
-        private int keepAlive = 60;
-        private int mqttVersion = MqttConnectOptions.MQTT_VERSION_3_1_1;
+        private int connectionTimeout = IMConstants.CONNECTION_TIMEOUT_DEFAULT;
+        private int keepAliveInterval = IMConstants.KEEP_ALIVE_INTERVAL_DEFAULT;
         private boolean cleanSession = true;
         private boolean tlsConnection = true;
         private boolean automaticReconnect = true;
 
-        public Builder setClientId(String clientId) {
-            this.clientId = clientId;
-            return this;
-        }
-
-        public Builder setName(@NonNull String userName) {
-            this.userName = userName;
+        public Builder setUsername(@NonNull String username) {
+            this.username = username;
             return this;
         }
 
@@ -57,18 +52,13 @@ public class IMClientConfig {
             return this;
         }
 
-        public Builder setTimeout(int timeout) {
-            this.timeout = timeout;
+        public Builder setTimeout(int connectionTimeout) {
+            this.connectionTimeout = connectionTimeout;
             return this;
         }
 
-        public Builder setKeepAlive(int keepAlive) {
-            this.keepAlive = keepAlive;
-            return this;
-        }
-
-        public Builder setMqttVersion(int mqttVersion) {
-            this.mqttVersion = mqttVersion;
+        public Builder setKeepAlive(int keepAliveInterval) {
+            this.keepAliveInterval = keepAliveInterval;
             return this;
         }
 
@@ -92,18 +82,49 @@ public class IMClientConfig {
         }
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public int getKeepAliveInterval() {
+        return keepAliveInterval;
+    }
+
+    public boolean isCleanSession() {
+        return cleanSession;
+    }
+
+    public boolean isTlsConnection() {
+        return tlsConnection;
+    }
+
+    public boolean isAutomaticReconnect() {
+        return automaticReconnect;
+    }
+
+    public int getMqttVersion() {
+        return mqttVersion;
+    }
+
     @Override
     public String toString() {
         return "IMClientConfig{" +
-                "  clientId='" + clientId + '\'' +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
-                ", timeout=" + timeout +
-                ", keepAlive=" + keepAlive +
-                ", mqttVersion=" + mqttVersion +
+                " username=" + username +
+                " ,password=" + password +
+                " ,connectionTimeout=" + connectionTimeout +
+                ", keepAliveInterval=" + keepAliveInterval +
                 ", cleanSession=" + cleanSession +
                 ", tlsConnection=" + tlsConnection +
                 ", automaticReconnect=" + automaticReconnect +
+                ", mqttVersion=" + mqttVersion +
                 '}';
     }
 }

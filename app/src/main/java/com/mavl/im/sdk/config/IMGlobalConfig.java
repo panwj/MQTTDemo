@@ -22,6 +22,8 @@ public class IMGlobalConfig {
      **/
     private static int port = 9883;
 
+    private static boolean debug;
+
     public static boolean initializeSDK(IMGlobalConfig config) {
         if (config == null) return false;
         if (TextUtils.isEmpty(getAppId()) || TextUtils.isEmpty(getAppToken())) return false;
@@ -40,6 +42,10 @@ public class IMGlobalConfig {
         return APP_ID;
     }
 
+    public static boolean isDebug() {
+        return debug;
+    }
+
     public static String getAppToken() {
         return APP_TOKEN;
     }
@@ -48,6 +54,7 @@ public class IMGlobalConfig {
         Logger.e("IMGlobalConfig()  builder : " + builder.toString());
         host = builder.host;
         port = builder.port;
+        debug = builder.debug;
         APP_ID = builder.appId;
         APP_TOKEN = builder.appToken;
     }
@@ -57,6 +64,7 @@ public class IMGlobalConfig {
         private int port = 9883;
         private String appId = "";
         private String appToken = "c90265a583aaea81";
+        private boolean debug = true;
 
         public IMGlobalConfigBuilder setHost(String host) {
             this.host = host;
@@ -75,6 +83,11 @@ public class IMGlobalConfig {
 
         public IMGlobalConfigBuilder setAppToken(String appToken) {
             this.appToken = appToken;
+            return this;
+        }
+
+        public IMGlobalConfigBuilder setDebug(boolean debug) {
+            this.debug = debug;
             return this;
         }
 

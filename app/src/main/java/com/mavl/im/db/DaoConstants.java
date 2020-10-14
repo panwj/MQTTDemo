@@ -15,9 +15,6 @@ public class DaoConstants {
         public static final String COLUMNS_MESSAGE_ID = "msg_id";
         public static final String COLUMNS_MESSAGE_CLIENT_ID = "msg_client_id";
         public static final String COLUMNS_MESSAGE_PAYLOAD = "msg_payload";
-        public static final String COLUMNS_MESSAGE_QOS = "msg_qos";
-        public static final String COLUMNS_MESSAGE_RETAINED = "msg_retained";
-        public static final String COLUMNS_MESSAGE_DUP = "msg_dup";
         public static final String COLUMNS_MESSAGE_TIMESTAMP = "msg_timeStamp";
         public static final String COLUMNS_MESSAGE_STATUS = "msg_status";
         public static final String COLUMNS_MESSAGE_IS_RECEIVED = "msg_isReceived";
@@ -31,9 +28,7 @@ public class DaoConstants {
         public static final String COLUMNS_MESSAGE_ID = "msg_id";
         public static final String COLUMNS_MESSAGE_CLIENT_ID = "msg_client_id";
         public static final String COLUMNS_MESSAGE_PAYLOAD = "msg_payload";
-        public static final String COLUMNS_MESSAGE_QOS = "msg_qos";
         public static final String COLUMNS_MESSAGE_RETAINED = "msg_retained";
-        public static final String COLUMNS_MESSAGE_DUP = "msg_dup";
         public static final String COLUMNS_MESSAGE_TIMESTAMP = "msg_timeStamp";
         public static final String COLUMNS_MESSAGE_STATUS = "msg_status";
         public static final String COLUMNS_MESSAGE_IS_RECEIVED = "msg_isReceived";
@@ -47,9 +42,6 @@ public class DaoConstants {
             + MessageEntry.COLUMNS_MESSAGE_ID + " TEXT,"
             + MessageEntry.COLUMNS_MESSAGE_CLIENT_ID + " INTEGER,"
             + MessageEntry.COLUMNS_MESSAGE_PAYLOAD + " TEXT,"
-            + MessageEntry.COLUMNS_MESSAGE_QOS + " INTEGER,"
-            + MessageEntry.COLUMNS_MESSAGE_RETAINED + " INTEGER,"
-            + MessageEntry.COLUMNS_MESSAGE_DUP + " INTEGER,"
             + MessageEntry.COLUMNS_MESSAGE_TIMESTAMP + " INTEGER,"
             + MessageEntry.COLUMNS_MESSAGE_STATUS + " INTEGER,"
             + MessageEntry.COLUMNS_MESSAGE_IS_RECEIVED + " INTEGER,"
@@ -63,9 +55,7 @@ public class DaoConstants {
             + MessageEntry2.COLUMNS_MESSAGE_ID + " TEXT,"
             + MessageEntry2.COLUMNS_MESSAGE_CLIENT_ID + " INTEGER,"
             + MessageEntry2.COLUMNS_MESSAGE_PAYLOAD + " TEXT,"
-            + MessageEntry2.COLUMNS_MESSAGE_QOS + " INTEGER,"
             + MessageEntry2.COLUMNS_MESSAGE_RETAINED + " INTEGER,"
-            + MessageEntry2.COLUMNS_MESSAGE_DUP + " INTEGER,"
             + MessageEntry2.COLUMNS_MESSAGE_TIMESTAMP + " INTEGER,"
             + MessageEntry2.COLUMNS_MESSAGE_STATUS + " INTEGER,"
             + MessageEntry2.COLUMNS_MESSAGE_IS_RECEIVED + " INTEGER,"
