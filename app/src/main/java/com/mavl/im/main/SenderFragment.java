@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mavl.im.BaseFragment;
+import com.mavl.im.GroupActivity;
 import com.mavl.im.IMManager;
 import com.mavl.im.R;
 import com.mavl.im.db.DaoUtil2;
@@ -43,8 +44,8 @@ public class SenderFragment extends BaseFragment {
     private RecyclerView recyclerView;
     private MessageAdapter adapter;
     private EditText editText;
-    private Button button;
-    private TextView clientStatusTv;
+    private ImageView send;
+    private TextView clientStatusTv, groupManagerTv;
     private IMMessageBroker client;
     private List<Message> mList;
 
@@ -101,6 +102,13 @@ public class SenderFragment extends BaseFragment {
         updateData();
 
         editText = view.findViewById(R.id.edit);
+        groupManagerTv = view.findViewById(R.id.tv_group_manager);
+        groupManagerTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GroupActivity.launchGroupActivity(getActivity(), client.getClientId());
+            }
+        });
         clientStatusTv = view.findViewById(R.id.client_status_tv);
         clientStatusTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,8 +134,8 @@ public class SenderFragment extends BaseFragment {
         });
         updateClientStatus();
 
-        button = view.findViewById(R.id.send);
-        button.setOnClickListener(new View.OnClickListener() {
+        send = view.findViewById(R.id.send);
+        send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Editable editable = editText.getText();

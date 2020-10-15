@@ -103,6 +103,7 @@ public class IMMessageBroker implements IMMessageClient {
     public void login() {
         try {
             if (isConnect()) {
+                Logger.e(clientId + "----> already login...");
                 if (imMessageDelegate != null) imMessageDelegate.loginSuccess();
                 return;
             }
@@ -123,6 +124,7 @@ public class IMMessageBroker implements IMMessageClient {
                 }
             });
         } catch (Exception e) {
+            Logger.e(clientId + "----> login  error : " + e.toString());
             if (imMessageDelegate != null) imMessageDelegate.loginError(new Throwable(e.toString()));
         }
     }
@@ -131,6 +133,7 @@ public class IMMessageBroker implements IMMessageClient {
     public void logout() {
         try {
             if (!isConnect()) {
+                Logger.e(clientId + "----> already logout...");
                 if (imMessageDelegate != null) imMessageDelegate.logoutSuccess();
                 return;
             }
@@ -150,6 +153,7 @@ public class IMMessageBroker implements IMMessageClient {
                 }
             });
         } catch (Exception e) {
+            Logger.e(clientId + "----> logout  error : " + e.toString());
             if (imMessageDelegate != null) imMessageDelegate.logoutError(new Throwable(e.toString()));
         }
     }
